@@ -15,6 +15,10 @@ pub mod instruction_codes {
     pub const PUSH: Byte = 0x15;
     pub const PUSHR: Byte = 0x16;
 
+	pub const CALL: Byte = 0x02;
+	pub const CALLR: Byte = 0x03;
+	pub const RET: Byte = 0x04;
+
     // Arithmetic
     pub const ADD: Byte = 0x20;
     pub const ADDR: Byte = 0x21;
