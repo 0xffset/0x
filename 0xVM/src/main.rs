@@ -1,5 +1,23 @@
 #![feature(panic_info_message)]
 
+use macros::{init_registries, reg};
+
+init_registries![
+    "r1",
+    "r2",
+    "r3",
+    "r4",
+    "r5",
+    "r6",
+    "r7",
+    "r8",
+    "pc", // program counter
+    "acc", // accumulator
+    "sr", // status register
+    "sp", // stack pointer
+    "fp", // frame pointer
+];
+
 mod memory;
 use std::panic;
 
@@ -24,15 +42,15 @@ fn main() {
 
     cpu.memory.set_byte(0, instruction_codes::MOVR);
     cpu.memory.set_word(1, 0x12345678);
-    cpu.memory.set_byte(5, *cpu.register_map.get("r1").unwrap());
+    cpu.memory.set_byte(5, reg!("r1"));
 
     cpu.memory.set_byte(6, instruction_codes::PUSH);
     cpu.memory.set_word(7, 0x90ABCDEF);
     cpu.memory.set_byte(11, instruction_codes::PUSHR);
-    cpu.memory.set_byte(12, *cpu.register_map.get("r1").unwrap());
+    cpu.memory.set_byte(12, reg!("r1"));
 
     cpu.memory.set_byte(13, instruction_codes::POP);
-    cpu.memory.set_byte(14, *cpu.register_map.get("r3").unwrap());
+    cpu.memory.set_byte(14, reg!("r3"));
 
     cpu.debug();
     cpu.step();
