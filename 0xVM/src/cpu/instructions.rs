@@ -1,16 +1,27 @@
 pub mod instruction_codes {
     use crate::memory::Byte;
 
-	pub const HALT: Byte = 0x00;
-	pub const NOP: Byte = 0x01;
+    pub const HALT: Byte = 0xFF;
+    pub const NOP: Byte = 0x00;
 
-	// MOV
-	pub const MOV_WORD_REG: Byte = 0x10;
-	pub const MOV_WORD_MEM: Byte = 0x11;
-	pub const MOV_REG_REG: Byte= 0x12;
-	pub const MOV_REG_MEM: Byte= 0x13;
-	pub const MOV_MEM_REG: Byte= 0x14;
+    // MOV
+    pub const MOVR: Byte = 0x10;
+    pub const MOVM: Byte = 0x11;
+    pub const MOVRR: Byte = 0x12;
+    pub const MOVRM: Byte = 0x13;
+    pub const MOVMR: Byte = 0x14;
 
-	// Arithmetic
-	pub const ADD_REG_REG: Byte = 0x20;
+	pub const POP: Byte = 0x05;
+    pub const PUSH: Byte = 0x15;
+    pub const PUSHR: Byte = 0x16;
+
+    // Arithmetic
+    pub const ADD: Byte = 0x20;
+    pub const ADDR: Byte = 0x21;
+
+    // Conditional jumps
+    pub const BRBS: Byte = 0x30;
+    pub const BRBC: Byte = 0x31;
+    pub const BREQ: Byte = 0x32;
+    pub const BRNQ: Byte = 0x33;
 }
