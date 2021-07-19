@@ -41,8 +41,16 @@ impl CPU {
         }
     }
 
-    fn get_status_flag(&self, flag: Byte) -> bool {
-        self.get_register(reg!("sr")) & (1u32.wrapping_shl(flag as Word)) != 0
+    /// Gets status flag at n
+    ///
+    /// # Example:
+    ///
+    /// ```
+    /// get_status_flag(1);
+    /// // returns `true` if bit 1 is set
+    /// ```
+    fn get_status_flag(&self, n: Byte) -> bool {
+        self.get_register(reg!("sr")) & (1u32.wrapping_shl(n as Word)) != 0
     }
 
     /// Gets the value of the register with the given address.
@@ -71,6 +79,7 @@ impl CPU {
         self.memory.get_word(next_instruction_address)
     }
 
+    /// Pushes onto stack and increments stackframe size
     fn push(&mut self, value: Word) {
         let sp_address = self.get_register(reg!("sp"));
         self.memory.set_word(sp_address, value);
@@ -79,6 +88,7 @@ impl CPU {
         self.stackframe_size += 4;
     }
 
+    /// Pops from the stack and decrements stackframe size
     fn pop(&mut self) -> Word {
         let next_sp_address = self.get_register(reg!("sp")) + 4;
         self.set_register(reg!("sp"), next_sp_address);
@@ -88,6 +98,7 @@ impl CPU {
         return self.memory.get_word(next_sp_address);
     }
 
+    /// Push state onto stack after CALL 
     fn push_state(&mut self) {
         for i in 0..8 {
             self.push(self.get_register(i * 4));
@@ -100,12 +111,14 @@ impl CPU {
         self.stackframe_size = 0;
     }
 
+    /// Pop state from stack after RET
     fn pop_state(&mut self) {
         let fp_address = self.get_register(reg!("fp"));
         self.set_register(reg!("sp"), fp_address);
 
-        let stackframe_size = self.pop();
-        self.stackframe_size = stackframe_size;
+        // bugfix where the stackframe is 0 but we need to pop the stackframe size
+        self.stackframe_size += 4;
+        self.stackframe_size = self.pop();
 
         let pc_address = self.pop();
         self.set_register(reg!("pc"), pc_address);
@@ -120,7 +133,7 @@ impl CPU {
             self.pop();
         }
 
-        self.set_register(reg!("fp"), fp_address + stackframe_size);
+        self.set_register(reg!("fp"), fp_address + self.stackframe_size);
     }
 
     fn execute(&mut self, instruction: Byte) {
@@ -274,6 +287,7 @@ impl CPU {
         }
     }
 
+    /// Prints a view of all registers to the console
     pub fn debug(&self) {
         for (name, address) in crate::REGISTERS {
             println!(
@@ -285,6 +299,7 @@ impl CPU {
         println!();
     }
 
+    /// Prints a view of a region of the memory to the console
     fn view_memory_at(&self, address: Word, n: Word) {
         let mut mem_snapshot: Vec<Byte> = Vec::new();
         let max_address = if address + n < self.memory.get_size() {

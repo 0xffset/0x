@@ -1,6 +1,6 @@
 #![feature(panic_info_message)]
 
-use macros::{init_registers, reg};
+use macros::init_registers;
 
 init_registers![
     "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", // general purpose registers
@@ -12,13 +12,19 @@ init_registers![
 ];
 
 mod memory;
-use std::panic;
+use std::{env, fs::File, io::Read, panic};
 
-use memory::Memory;
+use memory::{Byte, Memory, Word};
 mod cpu;
-use cpu::{instruction_codes, CPU};
+use cpu::CPU;
 
 fn main() {
+    let args: Vec<String> = env::args().collect();
+    if args.len() != 3 {
+        panic!("[VM] Usage: {0} <memory_size> <program_path>\nExample: {0} 0xFFFF a.bin", args.get(0).unwrap());
+    }
+    
+    // custom panic outputs
     panic::set_hook(Box::new(|panic_info| {
         if let Some(s) = panic_info.message() {
             println!("0xVM panicked at\n{}", s);
@@ -29,43 +35,28 @@ fn main() {
         }
     }));
 
-    let mut memory = Memory::new(0xFFFF);
 
-    memory.set_byte(0, instruction_codes::PUSH);
-    memory.set_word(1, 0x33333335);
-    memory.set_byte(5, instruction_codes::PUSH);
-    memory.set_word(6, 0x22222225);
-    memory.set_byte(10, instruction_codes::PUSH);
-    memory.set_word(11, 0x11111115);
-    memory.set_byte(15, instruction_codes::MOVR);
-    memory.set_word(16, 0x12341235);
-    memory.set_word(20, reg!("r1"));
-    memory.set_byte(24, instruction_codes::MOVR);
-    memory.set_word(25, 0x56785675);
-    memory.set_word(29, reg!("r4"));
-    memory.set_byte(33, instruction_codes::PUSH);
-    memory.set_word(34, 0x00000000);
-    memory.set_byte(38, instruction_codes::CALL);
-    memory.set_word(39, 3000);
-    memory.set_byte(43, instruction_codes::PUSH);
-    memory.set_word(44, 0x44444445);
-    memory.set_byte(48, instruction_codes::HALT);
+    let mem_size = match Word::from_str_radix(&args.get(1).unwrap()[2..], 16) {
+        Ok(size) => size,
+        Err(_) => panic!("[VM] Failed to parse memory size from arguments"),
+    };
 
-    memory.set_byte(3000, instruction_codes::PUSH);
-    memory.set_word(3001, 0x01020105);
-    memory.set_byte(3005, instruction_codes::PUSH);
-    memory.set_word(3006, 0x03040305);
-    memory.set_byte(3010, instruction_codes::PUSH);
-    memory.set_word(3011, 0x05060505);
-    memory.set_byte(3015, instruction_codes::MOVR);
-    memory.set_word(3016, 0x07080705);
-    memory.set_word(3020, reg!("r1"));
-    memory.set_byte(3024, instruction_codes::MOVR);
-    memory.set_word(3025, 0x080A0805);
-    memory.set_word(3029, reg!("r8"));
-    memory.set_byte(3033, instruction_codes::RET);
+    let mut memory = Memory::new(mem_size);
 
+    let mut bin = match File::open(args.get(2).unwrap()) {
+        Ok(file) => file,
+        Err(_) => panic!("[VM] Failed to open program file"),
+    };
+
+    // write program into memory
+    let mut buff = Vec::<Byte>::new();
+    bin.read_to_end(&mut buff).unwrap();
+    for (i, b) in buff.iter().enumerate() {
+        memory.set_byte(i as Word, *b);
+    }
 
     let mut cpu = CPU::new(memory);
-    cpu.run_debug(0xffff-1-84, 0xffff);
+    cpu.run();
+    // debug
+    //cpu.run_debug(mem_size - 70, mem_size - 1);
 }

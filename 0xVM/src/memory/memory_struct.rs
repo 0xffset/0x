@@ -9,9 +9,9 @@ pub struct Memory {
 }
 
 impl Memory {
-    pub fn new(size_in_bytes: usize) -> Memory {
+    pub fn new(size_in_bytes: Word) -> Memory {
         Memory {
-            data: vec![0; size_in_bytes],
+            data: vec![0; size_in_bytes as usize],
         }
     }
 
