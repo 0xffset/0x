@@ -27,7 +27,7 @@ impl CPU {
     }
 
     fn update_status_register(&mut self, pre: Word, post: Word) {
-        let status_register_address = reg!("sr") as Word;
+        let status_register_address = reg!("sr");
         if post == 0 {
             self.registers.or_set_byte(status_register_address, 0x01);
         } else {
@@ -46,35 +46,27 @@ impl CPU {
     }
 
     /// Gets the value of the register with the given address.
-    fn get_register(&self, address: Byte) -> Word {
-        self.registers.get_word(address as Word)
-    }
-
-    fn get_program_counter(&self) -> Word {
-        self.registers.get_word(reg!("pc") as Word)
-    }
-
-    fn set_program_counter(&mut self, value: Word) {
-        self.registers.set_word(reg!("pc") as Word, value);
+    fn get_register(&self, address: Word) -> Word {
+        self.registers.get_word(address)
     }
 
     /// Sets the value of the register with the given address.
-    fn set_register(&mut self, address: Byte, value: Word) {
-        self.registers.set_word(address as Word, value);
+    fn set_register(&mut self, address: Word, value: Word) {
+        self.registers.set_word(address, value);
     }
 
     /// Fetches the next byte from memory and increments the program counter.
     fn fetch_byte(&mut self) -> Byte {
-        let next_instruction_address = self.get_program_counter();
-        self.set_program_counter(next_instruction_address + 1);
+        let next_instruction_address = self.get_register(reg!("pc"));
+        self.set_register(reg!("pc"), next_instruction_address + 1);
 
         self.memory.get_byte(next_instruction_address)
     }
 
     /// Fetches the next word from memory and increments the program counter.
     fn fetch_word(&mut self) -> Word {
-        let next_instruction_address = self.get_program_counter();
-        self.set_program_counter(next_instruction_address + 4);
+        let next_instruction_address = self.get_register(reg!("pc"));
+        self.set_register(reg!("pc"), next_instruction_address + 4);
 
         self.memory.get_word(next_instruction_address)
     }
@@ -101,7 +93,7 @@ impl CPU {
             self.push(self.get_register(i * 4));
         }
 
-        self.push(self.get_program_counter());
+        self.push(self.get_register(reg!("pc")));
         self.push(self.stackframe_size + 4);
 
         self.set_register(reg!("fp"), self.get_register(reg!("sp")));
@@ -116,7 +108,7 @@ impl CPU {
         self.stackframe_size = stackframe_size;
 
         let pc_address = self.pop();
-        self.set_program_counter(pc_address);
+        self.set_register(reg!("pc"), pc_address);
 
         for i in (0..8).rev() {
             let gp_register_value = self.pop();
@@ -140,7 +132,7 @@ impl CPU {
             // MOVR 0x0000 1234, r1 -> Move 0x0000 1234 into register r1
             instruction_codes::MOVR => {
                 let value = self.fetch_word();
-                let register_address = self.fetch_byte();
+                let register_address = self.fetch_word();
                 self.set_register(register_address, value);
             }
             // MOVM 0x0000 1234, 0x0000 00AF -> Move 0x0000 1234 into memory at 0x0000 00AF
@@ -151,8 +143,8 @@ impl CPU {
             }
             // MOVRR r1, r2 -> Move register r1 into register r2
             instruction_codes::MOVRR => {
-                let register1_address = self.fetch_byte();
-                let register2_address = self.fetch_byte();
+                let register1_address = self.fetch_word();
+                let register2_address = self.fetch_word();
                 self.set_register(
                     register2_address,
                     self.get_register(register1_address),
@@ -160,7 +152,7 @@ impl CPU {
             }
             // MOVRM r1, 0x0000 00AF -> Move register r1 into memory ar 0x0000 00AF
             instruction_codes::MOVRM => {
-                let register_address = self.fetch_byte();
+                let register_address = self.fetch_word();
                 let memory_address = self.fetch_word();
                 self.memory.set_word(
                     memory_address,
@@ -170,7 +162,7 @@ impl CPU {
             // MOVMR 0x0000 00AF, r1 -> Move memory at 0x0000 00AF into register r1
             instruction_codes::MOVMR => {
                 let memory_address = self.fetch_word();
-                let register_address = self.fetch_byte();
+                let register_address = self.fetch_word();
                 self.set_register(
                     register_address,
                     self.memory.get_word(memory_address),
@@ -178,7 +170,7 @@ impl CPU {
             }
             // POP r1 -> Pop value from stack into register r1
             instruction_codes::POP => {
-                let register_address = self.fetch_byte();
+                let register_address = self.fetch_word();
                 let value = self.pop();
                 self.set_register(register_address, value);
             }
@@ -190,7 +182,7 @@ impl CPU {
             }
             // PUSHR r1 -> Push register r1 onto stack
             instruction_codes::PUSHR => {
-                let register_address = self.fetch_byte();
+                let register_address = self.fetch_word();
                 let value = self.get_register(register_address);
 
                 self.push(value);
@@ -198,7 +190,7 @@ impl CPU {
             // ADD 0x0000 1234, r1 -> Add 0x0000 1234 to register r1 and store the result in acc
             instruction_codes::ADD => {
                 let value = self.fetch_word();
-                let register_address = self.fetch_byte();
+                let register_address = self.fetch_word();
                 let register_value = self.get_register(register_address);
 
                 let acc = value.wrapping_add(register_value);
@@ -209,8 +201,8 @@ impl CPU {
             }
             // ADDR r1, r2 -> Add register r1 and register r2 and store the result in acc
             instruction_codes::ADDR => {
-                let register1_address = self.fetch_byte();
-                let register2_address = self.fetch_byte();
+                let register1_address = self.fetch_word();
+                let register2_address = self.fetch_word();
 
                 let register1_value = self.get_register(register1_address);
                 let register2_value = self.get_register(register2_address);
@@ -226,7 +218,7 @@ impl CPU {
                 let flag = self.fetch_byte();
                 let address = self.fetch_word();
                 if self.get_status_flag(flag) {
-                    self.set_program_counter(address);
+                    self.set_register(reg!("pc"), address);
                 }
             }
             // BRBC FLAG_Z, 0x0000 00AF -> If the flag Z is clear, jump to 0x0000 00AF
@@ -234,7 +226,7 @@ impl CPU {
                 let flag = self.fetch_byte();
                 let address = self.fetch_word();
                 if !self.get_status_flag(flag) {
-                    self.set_program_counter(address);
+                    self.set_register(reg!("pc"), address);
                 }
             }
             // BREQ 0x0000 1234, 0x0000 0005 -> Jump to 0x0000 0005 if acc does equal 0x0000 1234
@@ -243,7 +235,7 @@ impl CPU {
                 let address = self.fetch_word();
 
                 if self.get_register(reg!("acc")) == value {
-                    self.set_program_counter(address);
+                    self.set_register(reg!("pc"), address);
                 }
             }
             // BRNQ 0x0000 1234, 0x0000 0005 -> Jump to 0x0000 0005 if acc does not equal 0x0000 1234
@@ -252,7 +244,7 @@ impl CPU {
                 let address = self.fetch_word();
 
                 if self.get_register(reg!("acc")) != value {
-                    self.set_program_counter(address);
+                    self.set_register(reg!("pc"), address);
                 }
             }
             // CALL 0x0000 00AF -> Call subroutine at 0x0000 00AF
@@ -261,16 +253,16 @@ impl CPU {
 
                 self.push_state();
 
-                self.set_program_counter(address);
+                self.set_register(reg!("pc"), address);
             }
             // CALL r1 -> Call subroutine at r1
             instruction_codes::CALLR => {
-                let register_address = self.fetch_byte();
+                let register_address = self.fetch_word();
                 let address = self.get_register(register_address);
 
                 self.push_state();
 
-                self.set_program_counter(address);
+                self.set_register(reg!("pc"), address);
             }
             // RET -> Return from subroutine
             instruction_codes::RET => {

@@ -11,7 +11,7 @@ use std::sync::{ Arc, Mutex };
 
 lazy_static::lazy_static!{
     // Internal, compile-time record of registers.
-    static ref REGISTERS: Arc<Mutex<HashMap<String, u8>>> = Arc::new(Mutex::new(HashMap::new()));
+    static ref REGISTERS: Arc<Mutex<HashMap<String, u32>>> = Arc::new(Mutex::new(HashMap::new()));
 }
 
 #[proc_macro]
@@ -23,21 +23,21 @@ pub fn init_registers(input: TokenStream) -> TokenStream {
     // Form a list from the parsed register list.
     // Use a vec of a tuple here, to preserve the order,
     // Useful for extracting down below.
-    let map: Vec<(String, u8)> = test.iter().enumerate()
-        .map(|(i, n)| (n.value(), i as u8 * 4))
+    let map: Vec<(String, u32)> = test.iter().enumerate()
+        .map(|(i, n)| (n.value(), i as u32 * 4))
         .collect();
 
     // Extract these values to write as output tokens.
     let count = map.len();
     let names: Vec<String> = map.iter().map(|(s, _a)| s.clone()).collect();
-    let addresses: Vec<u8> = map.iter().map(|(_s, a)| *a).collect();
+    let addresses: Vec<u32> = map.iter().map(|(_s, a)| *a).collect();
 
     // Update the internal record, by collecting to a hashmap.
     *REGISTERS.lock().unwrap() = map.into_iter().collect();
 
     (quote!{
         // Slice of register names and their corresponding addresses.
-        pub const REGISTERS: &'static [(&'static str, u8)] = &[
+        pub const REGISTERS: &'static [(&'static str, u32)] = &[
             #(
                 (#names, #addresses),
             )*

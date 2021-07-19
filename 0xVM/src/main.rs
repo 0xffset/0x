@@ -39,17 +39,17 @@ fn main() {
     memory.set_word(11, 0x11111115);
     memory.set_byte(15, instruction_codes::MOVR);
     memory.set_word(16, 0x12341235);
-    memory.set_byte(20, reg!("r1"));
-    memory.set_byte(21, instruction_codes::MOVR);
-    memory.set_word(22, 0x56785675);
-    memory.set_byte(26, reg!("r4"));
-    memory.set_byte(27, instruction_codes::PUSH);
-    memory.set_word(28, 0x00000000);
-    memory.set_byte(32, instruction_codes::CALL);
-    memory.set_word(33, 3000);
-    memory.set_byte(37, instruction_codes::PUSH);
-    memory.set_word(38, 0x44444445);
-    memory.set_byte(42, instruction_codes::HALT);
+    memory.set_word(20, reg!("r1"));
+    memory.set_byte(24, instruction_codes::MOVR);
+    memory.set_word(25, 0x56785675);
+    memory.set_word(29, reg!("r4"));
+    memory.set_byte(33, instruction_codes::PUSH);
+    memory.set_word(34, 0x00000000);
+    memory.set_byte(38, instruction_codes::CALL);
+    memory.set_word(39, 3000);
+    memory.set_byte(43, instruction_codes::PUSH);
+    memory.set_word(44, 0x44444445);
+    memory.set_byte(48, instruction_codes::HALT);
 
     memory.set_byte(3000, instruction_codes::PUSH);
     memory.set_word(3001, 0x01020105);
@@ -59,11 +59,11 @@ fn main() {
     memory.set_word(3011, 0x05060505);
     memory.set_byte(3015, instruction_codes::MOVR);
     memory.set_word(3016, 0x07080705);
-    memory.set_byte(3020, reg!("r1"));
-    memory.set_byte(3021, instruction_codes::MOVR);
-    memory.set_word(3022, 0x080A0805);
-    memory.set_byte(3026, reg!("r8"));
-    memory.set_byte(3027, instruction_codes::RET);
+    memory.set_word(3020, reg!("r1"));
+    memory.set_byte(3024, instruction_codes::MOVR);
+    memory.set_word(3025, 0x080A0805);
+    memory.set_word(3029, reg!("r8"));
+    memory.set_byte(3033, instruction_codes::RET);
 
 
     let mut cpu = CPU::new(memory);
