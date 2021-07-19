@@ -1,54 +1,33 @@
-use std::collections::HashMap;
-
 use crate::memory::{Byte, Memory, Word};
+use macros::reg;
 
 use super::instruction_codes;
 
 pub struct CPU {
     memory: Memory,
-    register_names: Vec<&'static str>,
     registers: Memory,
-    register_map: HashMap<&'static str, Byte>,
     stackframe_size: Word,
     halt_signal: bool,
 }
 
 impl CPU {
     pub fn new(memory: Memory) -> CPU {
-        let register_names = vec![
-            "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8",  // general purpose registers
-            "pc",  // program counter
-            "acc", // accumulator
-            "sr",  // status register
-            "sp",  // stack pointer
-            "fp",  // frame pointer
-        ];
-        let register_names_len = register_names.len();
-
-        let register_map: HashMap<&'static str, Byte> = register_names
-            .iter()
-            .enumerate()
-            .map(|(i, n)| (n.clone(), i as Byte * 4))
-            .collect();
-
         let mut ret = CPU {
             memory,
-            register_names,
-            registers: Memory::new(register_names_len * 4),
-            register_map,
+            registers: Memory::new(crate::REGISTER_COUNT * 4),
             stackframe_size: 0,
             halt_signal: false,
         };
 
         // -4 because 4 bytes to store a 32-Bit address
-        ret.set_register_by_name("sp", ret.memory.get_size() - 4);
-        ret.set_register_by_name("fp", ret.memory.get_size() - 4);
+        ret.set_register(reg!("sp"), ret.memory.get_size() - 4);
+        ret.set_register(reg!("fp"), ret.memory.get_size() - 4);
 
         ret
     }
 
     fn update_status_register(&mut self, pre: Word, post: Word) {
-        let status_register_address = *self.register_map.get("sr").unwrap() as Word;
+        let status_register_address = reg!("sr") as Word;
         if post == 0 {
             self.registers.or_set_byte(status_register_address, 0x01);
         } else {
@@ -63,45 +42,24 @@ impl CPU {
     }
 
     fn get_status_flag(&self, flag: Byte) -> bool {
-        self.get_register_by_name("sr") & (1u32.wrapping_shl(flag as Word)) != 0
-    }
-
-    /// Gets the value of the register with the given name.
-    fn get_register_by_name(&self, name: impl AsRef<str>) -> Word {
-        self.registers.get_word(
-            *self.register_map.get(name.as_ref()).expect(
-                format!("[CPU] get_register: No such register '{}'", name.as_ref()).as_str(),
-            ) as Word,
-        )
+        self.get_register(reg!("sr")) & (1u32.wrapping_shl(flag as Word)) != 0
     }
 
     /// Gets the value of the register with the given address.
-    fn get_register_by_address(&self, address: Byte) -> Word {
+    fn get_register(&self, address: Byte) -> Word {
         self.registers.get_word(address as Word)
     }
 
-    /// Sets the value of the register with the given name.
-    fn set_register_by_name(&mut self, name: impl AsRef<str>, value: Word) {
-        self.registers.set_word(
-            *self.register_map.get(name.as_ref()).expect(
-                format!("[CPU] set_register: No such register '{}'", name.as_ref()).as_str(),
-            ) as Word,
-            value,
-        );
-    }
-
     fn get_program_counter(&self) -> Word {
-        self.registers
-            .get_word(*self.register_map.get("pc").unwrap() as Word)
+        self.registers.get_word(reg!("pc") as Word)
     }
 
     fn set_program_counter(&mut self, value: Word) {
-        self.registers
-            .set_word(*self.register_map.get("pc").unwrap() as Word, value);
+        self.registers.set_word(reg!("pc") as Word, value);
     }
 
     /// Sets the value of the register with the given address.
-    fn set_register_by_address(&mut self, address: Byte, value: Word) {
+    fn set_register(&mut self, address: Byte, value: Word) {
         self.registers.set_word(address as Word, value);
     }
 
@@ -122,16 +80,16 @@ impl CPU {
     }
 
     fn push(&mut self, value: Word) {
-        let sp_address = self.get_register_by_name("sp");
+        let sp_address = self.get_register(reg!("sp"));
         self.memory.set_word(sp_address, value);
-        self.set_register_by_name("sp", sp_address - 4);
+        self.set_register(reg!("sp"), sp_address - 4);
 
         self.stackframe_size += 4;
     }
 
     fn pop(&mut self) -> Word {
-        let next_sp_address = self.get_register_by_name("sp") + 4;
-        self.set_register_by_name("sp", next_sp_address);
+        let next_sp_address = self.get_register(reg!("sp")) + 4;
+        self.set_register(reg!("sp"), next_sp_address);
 
         self.stackframe_size -= 4;
 
@@ -139,20 +97,20 @@ impl CPU {
     }
 
     fn push_state(&mut self) {
-        for i in 1..9 {
-            self.push(self.get_register_by_name(format!("r{}", i)));
+        for i in 0..8 {
+            self.push(self.get_register(i * 4));
         }
 
         self.push(self.get_program_counter());
         self.push(self.stackframe_size + 4);
 
-        self.set_register_by_name("fp", self.get_register_by_name("sp"));
+        self.set_register(reg!("fp"), self.get_register(reg!("sp")));
         self.stackframe_size = 0;
     }
 
     fn pop_state(&mut self) {
-        let fp_address = self.get_register_by_name("fp");
-        self.set_register_by_name("sp", fp_address);
+        let fp_address = self.get_register(reg!("fp"));
+        self.set_register(reg!("sp"), fp_address);
 
         let stackframe_size = self.pop();
         self.stackframe_size = stackframe_size;
@@ -160,9 +118,9 @@ impl CPU {
         let pc_address = self.pop();
         self.set_program_counter(pc_address);
 
-        for i in (1..9).rev() {
+        for i in (0..8).rev() {
             let gp_register_value = self.pop();
-            self.set_register_by_name(format!("r{}", i), gp_register_value);
+            self.set_register(i * 4, gp_register_value);
         }
 
         let arg_count = self.pop();
@@ -170,7 +128,7 @@ impl CPU {
             self.pop();
         }
 
-        self.set_register_by_name("fp", fp_address + stackframe_size);
+        self.set_register(reg!("fp"), fp_address + stackframe_size);
     }
 
     fn execute(&mut self, instruction: Byte) {
@@ -183,7 +141,7 @@ impl CPU {
             instruction_codes::MOVR => {
                 let value = self.fetch_word();
                 let register_address = self.fetch_byte();
-                self.set_register_by_address(register_address, value);
+                self.set_register(register_address, value);
             }
             // MOVM 0x0000 1234, 0x0000 00AF -> Move 0x0000 1234 into memory at 0x0000 00AF
             instruction_codes::MOVM => {
@@ -195,9 +153,9 @@ impl CPU {
             instruction_codes::MOVRR => {
                 let register1_address = self.fetch_byte();
                 let register2_address = self.fetch_byte();
-                self.set_register_by_address(
+                self.set_register(
                     register2_address,
-                    self.get_register_by_address(register1_address),
+                    self.get_register(register1_address),
                 );
             }
             // MOVRM r1, 0x0000 00AF -> Move register r1 into memory ar 0x0000 00AF
@@ -206,14 +164,14 @@ impl CPU {
                 let memory_address = self.fetch_word();
                 self.memory.set_word(
                     memory_address,
-                    self.get_register_by_address(register_address),
+                    self.get_register(register_address),
                 );
             }
             // MOVMR 0x0000 00AF, r1 -> Move memory at 0x0000 00AF into register r1
             instruction_codes::MOVMR => {
                 let memory_address = self.fetch_word();
                 let register_address = self.fetch_byte();
-                self.set_register_by_address(
+                self.set_register(
                     register_address,
                     self.memory.get_word(memory_address),
                 );
@@ -222,7 +180,7 @@ impl CPU {
             instruction_codes::POP => {
                 let register_address = self.fetch_byte();
                 let value = self.pop();
-                self.set_register_by_address(register_address, value);
+                self.set_register(register_address, value);
             }
             // PUSH 0x0000 1234 -> Push 0x0000 1234 onto stack
             instruction_codes::PUSH => {
@@ -233,7 +191,7 @@ impl CPU {
             // PUSHR r1 -> Push register r1 onto stack
             instruction_codes::PUSHR => {
                 let register_address = self.fetch_byte();
-                let value = self.get_register_by_address(register_address);
+                let value = self.get_register(register_address);
 
                 self.push(value);
             }
@@ -241,11 +199,11 @@ impl CPU {
             instruction_codes::ADD => {
                 let value = self.fetch_word();
                 let register_address = self.fetch_byte();
-                let register_value = self.get_register_by_address(register_address);
+                let register_value = self.get_register(register_address);
 
                 let acc = value.wrapping_add(register_value);
 
-                self.set_register_by_name("acc", acc);
+                self.set_register(reg!("acc"), acc);
 
                 self.update_status_register(value, acc);
             }
@@ -254,12 +212,12 @@ impl CPU {
                 let register1_address = self.fetch_byte();
                 let register2_address = self.fetch_byte();
 
-                let register1_value = self.get_register_by_address(register1_address);
-                let register2_value = self.get_register_by_address(register2_address);
+                let register1_value = self.get_register(register1_address);
+                let register2_value = self.get_register(register2_address);
 
                 let acc = register1_value.wrapping_add(register2_value);
 
-                self.set_register_by_name("acc", acc);
+                self.set_register(reg!("acc"), acc);
 
                 self.update_status_register(register1_value, acc);
             }
@@ -284,7 +242,7 @@ impl CPU {
                 let value = self.fetch_word();
                 let address = self.fetch_word();
 
-                if self.get_register_by_name("acc") == value {
+                if self.get_register(reg!("acc")) == value {
                     self.set_program_counter(address);
                 }
             }
@@ -293,7 +251,7 @@ impl CPU {
                 let value = self.fetch_word();
                 let address = self.fetch_word();
 
-                if self.get_register_by_name("acc") != value {
+                if self.get_register(reg!("acc")) != value {
                     self.set_program_counter(address);
                 }
             }
@@ -308,7 +266,7 @@ impl CPU {
             // CALL r1 -> Call subroutine at r1
             instruction_codes::CALLR => {
                 let register_address = self.fetch_byte();
-                let address = self.get_register_by_address(register_address);
+                let address = self.get_register(register_address);
 
                 self.push_state();
 
@@ -324,9 +282,13 @@ impl CPU {
         }
     }
 
-    fn debug(&self) {
-        for name in self.register_names.clone() {
-            println!("{:<4}: 0x{:08X}", name, self.get_register_by_name(name));
+    pub fn debug(&self) {
+        for (name, address) in crate::REGISTERS {
+            println!(
+                "{:<4}: 0x{:08X}",
+                name,
+                self.get_register(*address)
+            );
         }
         println!();
     }
