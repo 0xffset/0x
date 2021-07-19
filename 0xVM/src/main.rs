@@ -1,8 +1,8 @@
 #![feature(panic_info_message)]
 
-use macros::{init_registries, reg};
+use macros::{init_registers, reg};
 
-init_registries![
+init_registers![
     "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", // general purpose registers
     "pc", // program counter
     "acc", // accumulator
@@ -17,8 +17,6 @@ use std::panic;
 use memory::Memory;
 mod cpu;
 use cpu::{instruction_codes, CPU};
-
-use crate::memory::Byte;
 
 fn main() {
     panic::set_hook(Box::new(|panic_info| {

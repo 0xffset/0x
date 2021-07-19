@@ -80,7 +80,7 @@ impl CPU {
     }
 
     fn push(&mut self, value: Word) {
-        let sp_address = reg!("sp") as Word;
+        let sp_address = self.get_register(reg!("sp"));
         self.memory.set_word(sp_address, value);
         self.set_register(reg!("sp"), sp_address - 4);
 
@@ -88,7 +88,7 @@ impl CPU {
     }
 
     fn pop(&mut self) -> Word {
-        let next_sp_address = reg!("sp") as Word + 4;
+        let next_sp_address = self.get_register(reg!("sp")) + 4;
         self.set_register(reg!("sp"), next_sp_address);
 
         self.stackframe_size -= 4;
@@ -97,8 +97,8 @@ impl CPU {
     }
 
     fn push_state(&mut self) {
-        for address in 0..crate::REGISTER_COUNT {
-            self.push(self.get_register(address as Byte * 4));
+        for i in 0..8 {
+            self.push(self.get_register(i * 4));
         }
 
         self.push(self.get_program_counter());
@@ -118,7 +118,7 @@ impl CPU {
         let pc_address = self.pop();
         self.set_program_counter(pc_address);
 
-        for i in (1..9).rev() {
+        for i in (0..8).rev() {
             let gp_register_value = self.pop();
             self.set_register(i * 4, gp_register_value);
         }

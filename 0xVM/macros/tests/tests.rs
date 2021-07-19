@@ -1,10 +1,10 @@
 #![allow(unused_imports)]
 
-use macros::{ init_registries, reg };
+use macros::{ init_registers, reg };
 
 #[test]
 fn init() {
-    init_registries![
+    init_registers![
         "r1",
         "r2",
         "r3"
@@ -16,8 +16,8 @@ fn init() {
 }
 
 #[test]
-fn valid_registry() {
-    init_registries![
+fn valid_registers() {
+    init_registers![
         "r1",
         "r2",
         "r3"
@@ -33,8 +33,8 @@ fn valid_registry() {
 /*
 #[test]
 #[should_panic]
-fn invalid_registry() {
-    init_registries![
+fn invalid_registers() {
+    init_registers![
         "r1",
         "r2",
         "r3"
