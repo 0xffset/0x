@@ -11,6 +11,8 @@ init_registers![
     "fp", // frame pointer
 ];
 
+mod device;
+
 mod memory;
 use std::{env, fs::File, io::Read, panic};
 
@@ -18,10 +20,12 @@ use memory::{Byte, Memory, Word};
 mod cpu;
 use cpu::CPU;
 
+use crate::{device::Device, memory::MemoryMapper};
+
 fn main() {
     let args: Vec<String> = env::args().collect();
-    if args.len() != 3 {
-        panic!("[VM] Usage: {0} <memory_size> <program_path>\nExample: {0} 0xFFFF a.bin", args.get(0).unwrap());
+    if args.len() != 2 {
+        panic!("[VM] Usage: {0} <program_path>\nExample: {0} a.bin", args.get(0).unwrap());
     }
     
     // custom panic outputs
@@ -34,20 +38,13 @@ fn main() {
             println!("0xVM panicked!");
         }
     }));
-
-
-    let mem_size = match Word::from_str_radix(&args.get(1).unwrap()[2..], 16) {
-        Ok(size) => size,
-        Err(_) => panic!("[VM] Failed to parse memory size from arguments"),
-    };
-
-    let mut memory = Memory::new(mem_size);
-
-    let mut bin = match File::open(args.get(2).unwrap()) {
+    
+    let mut bin = match File::open(args.get(1).unwrap()) {
         Ok(file) => file,
         Err(_) => panic!("[VM] Failed to open program file"),
     };
-
+    
+    let mut memory = Memory::new(0xFFFF);
     // write program into memory
     let mut buff = Vec::<Byte>::new();
     bin.read_to_end(&mut buff).unwrap();
@@ -55,8 +52,12 @@ fn main() {
         memory.set_byte(i as Word, *b);
     }
 
-    let mut cpu = CPU::new(memory);
-    cpu.run();
+    let mut MM = MemoryMapper::new();
+    MM.map(Box::new(memory), 0, 0xFFFF, true);
+
+    let mut cpu = CPU::new(MM);
+    
+    //cpu.run();
     // debug
-    //cpu.run_debug(mem_size - 70, mem_size - 1);
+    cpu.run_debug(0xFFFF - 70, 70);
 }

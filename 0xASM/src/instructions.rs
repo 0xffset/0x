@@ -13,13 +13,13 @@ pub mod instruction_codes {
     pub const MOVRM: (Byte, usize) = (0x13, 2);
     pub const MOVMR: (Byte, usize) = (0x14, 2);
 
-	pub const POP: (Byte, usize) = (0x05, 1);
+    pub const POP: (Byte, usize) = (0x05, 1);
     pub const PUSH: (Byte, usize) = (0x15, 1);
     pub const PUSHR: (Byte, usize) = (0x16, 1);
 
-	pub const CALL: (Byte, usize) = (0x02, 1);
-	pub const CALLR: (Byte, usize) = (0x03, 1);
-	pub const RET: (Byte, usize) = (0x04, 0);
+    pub const CALL: (Byte, usize) = (0x02, 1);
+    pub const CALLR: (Byte, usize) = (0x03, 1);
+    pub const RET: (Byte, usize) = (0x04, 0);
 
     // Arithmetic
     pub const ADD: (Byte, usize) = (0x20, 2);

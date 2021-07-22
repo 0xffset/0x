@@ -190,9 +190,9 @@ fn main() -> Result<(), String> {
             // comments with ; are allowed
             if line.starts_with(";") {
                 continue;
-            } else if line.starts_with("::") {
+            } else if line.starts_with(":") {
                 // catch label definition and save the label plus its location in the output file
-                let label = line[2..].to_string();
+                let label = line[1..].to_string();
 
                 jump_label_map.insert(label, total_bytes_written);
 

@@ -1,27 +1,28 @@
-use crate::memory::{Byte, Memory, Word};
+use crate::{device::Device, memory::{Byte, Memory, MemoryMapper, Word}};
 use macros::reg;
 
 use super::instruction_codes;
 
 pub struct CPU {
-    memory: Memory,
+    memory_mapper: MemoryMapper,
     registers: Memory,
     stackframe_size: Word,
     halt_signal: bool,
 }
 
 impl CPU {
-    pub fn new(memory: Memory) -> CPU {
+    pub fn new(memory_mapper: MemoryMapper) -> CPU {
         let mut ret = CPU {
-            memory,
-            registers: Memory::new(crate::REGISTER_COUNT * 4),
+            memory_mapper,
+            registers: Memory::new((crate::REGISTER_COUNT * 4) as u32),
             stackframe_size: 0,
             halt_signal: false,
         };
 
         // -4 because 4 bytes to store a 32-Bit address
-        ret.set_register(reg!("sp"), ret.memory.get_size() - 4);
-        ret.set_register(reg!("fp"), ret.memory.get_size() - 4);
+        // TODO: change this to not hard coded
+        ret.set_register(reg!("sp"), 0xFFFF - 4);
+        ret.set_register(reg!("fp"), 0xFFFF - 4);
 
         ret
     }
@@ -68,7 +69,7 @@ impl CPU {
         let next_instruction_address = self.get_register(reg!("pc"));
         self.set_register(reg!("pc"), next_instruction_address + 1);
 
-        self.memory.get_byte(next_instruction_address)
+        self.memory_mapper.get_byte(next_instruction_address)
     }
 
     /// Fetches the next word from memory and increments the program counter.
@@ -76,13 +77,13 @@ impl CPU {
         let next_instruction_address = self.get_register(reg!("pc"));
         self.set_register(reg!("pc"), next_instruction_address + 4);
 
-        self.memory.get_word(next_instruction_address)
+        self.memory_mapper.get_word(next_instruction_address)
     }
 
     /// Pushes onto stack and increments stackframe size
     fn push(&mut self, value: Word) {
         let sp_address = self.get_register(reg!("sp"));
-        self.memory.set_word(sp_address, value);
+        self.memory_mapper.set_word(sp_address, value);
         self.set_register(reg!("sp"), sp_address - 4);
 
         self.stackframe_size += 4;
@@ -95,7 +96,7 @@ impl CPU {
 
         self.stackframe_size -= 4;
 
-        return self.memory.get_word(next_sp_address);
+        return self.memory_mapper.get_word(next_sp_address);
     }
 
     /// Push state onto stack after CALL 
@@ -152,7 +153,7 @@ impl CPU {
             instruction_codes::MOVM => {
                 let value = self.fetch_word();
                 let memory_address = self.fetch_word();
-                self.memory.set_word(memory_address, value);
+                self.memory_mapper.set_word(memory_address, value);
             }
             // MOVRR r1, r2 -> Move register r1 into register r2
             instruction_codes::MOVRR => {
@@ -167,7 +168,7 @@ impl CPU {
             instruction_codes::MOVRM => {
                 let register_address = self.fetch_word();
                 let memory_address = self.fetch_word();
-                self.memory.set_word(
+                self.memory_mapper.set_word(
                     memory_address,
                     self.get_register(register_address),
                 );
@@ -178,7 +179,7 @@ impl CPU {
                 let register_address = self.fetch_word();
                 self.set_register(
                     register_address,
-                    self.memory.get_word(memory_address),
+                    self.memory_mapper.get_word(memory_address),
                 );
             }
             // POP r1 -> Pop value from stack into register r1
@@ -302,14 +303,20 @@ impl CPU {
     /// Prints a view of a region of the memory to the console
     fn view_memory_at(&self, address: Word, n: Word) {
         let mut mem_snapshot: Vec<Byte> = Vec::new();
-        let max_address = if address + n < self.memory.get_size() {
+        // TODO
+        
+        /*
+        let max_address = if address + n < self.memory_mapper.get_size() {
             address + n
         } else {
-            self.memory.get_size()
+            self.memory_mapper.get_size()
         };
+        */
+        
+        let max_address = address + n;
 
         for i in address..max_address {
-            mem_snapshot.push(self.memory.get_byte(i));
+            mem_snapshot.push(self.memory_mapper.get_byte(i));
         }
 
         for (offset, byte) in mem_snapshot.iter().enumerate() {
