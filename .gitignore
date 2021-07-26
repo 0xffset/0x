@@ -2,3 +2,4 @@
 0xASM/target
 0xASM/*.bin
 0xASM/*.oasm
+~*.*

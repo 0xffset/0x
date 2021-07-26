@@ -12,6 +12,8 @@ pub mod instruction_codes {
     pub const MOVRR: (Byte, usize) = (0x12, 2);
     pub const MOVRM: (Byte, usize) = (0x13, 2);
     pub const MOVMR: (Byte, usize) = (0x14, 2);
+    pub const MOVRPR: (Byte, usize) = (0x17, 2);
+    pub const MOVROR: (Byte, usize) = (0x18, 3);
 
     pub const POP: (Byte, usize) = (0x05, 1);
     pub const PUSH: (Byte, usize) = (0x15, 1);
@@ -44,6 +46,8 @@ pub fn instruction_to_byte(i: &str) -> Option<(Byte, usize)> {
         "MOVRR" => Some(MOVRR),
         "MOVRM" => Some(MOVRM),
         "MOVMR" => Some(MOVMR),
+        "MOVRPR" => Some(MOVRPR),
+        "MOVROR" => Some(MOVROR),
 
         "POP" => Some(POP),
         "PUSH" => Some(PUSH),

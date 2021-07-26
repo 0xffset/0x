@@ -10,6 +10,8 @@ pub mod instruction_codes {
     pub const MOVRR: Byte = 0x12;
     pub const MOVRM: Byte = 0x13;
     pub const MOVMR: Byte = 0x14;
+    pub const MOVRPR : Byte = 0x17;
+    pub const MOVROR : Byte = 0x18;
 
 	pub const POP: Byte = 0x05;
     pub const PUSH: Byte = 0x15;
