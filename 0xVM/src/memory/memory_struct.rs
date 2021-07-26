@@ -3,6 +3,7 @@ use std::convert::TryInto;
 use crate::device::Device;
 
 pub type Word = u32;
+pub type HalfWord = u16;
 pub type Byte = u8;
 
 #[derive(Clone, PartialEq)]
@@ -10,11 +11,26 @@ pub struct Memory {
     data: Vec<Byte>,
 }
 
+#[allow(dead_code)]
 impl Memory {
     pub fn new(size_in_bytes: Word) -> Memory {
         Memory {
             data: vec![0; size_in_bytes as usize],
         }
+    }
+
+    pub fn from(mut data: Vec<Byte>, total_size: Word) -> Memory {
+        let buffer = if total_size > data.len() as Word {
+            total_size - data.len() as Word
+        } else {
+            0
+        };
+        
+        for _ in 0..buffer {
+            data.push(0);
+        }
+
+        Memory { data }
     }
 
     pub fn get_size(&self) -> Word {
@@ -40,6 +56,7 @@ impl Memory {
     }
 }
 
+#[allow(dead_code)]
 impl Device for Memory {
     fn get_byte(&self, address: Word) -> Byte {
         *self

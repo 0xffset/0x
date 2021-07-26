@@ -10,6 +10,7 @@ pub struct CPU {
     halt_signal: bool,
 }
 
+#[allow(dead_code)]
 impl CPU {
     pub fn new(memory_mapper: MemoryMapper) -> CPU {
         let mut ret = CPU {
@@ -304,14 +305,6 @@ impl CPU {
     fn view_memory_at(&self, address: Word, n: Word) {
         let mut mem_snapshot: Vec<Byte> = Vec::new();
         // TODO
-        
-        /*
-        let max_address = if address + n < self.memory_mapper.get_size() {
-            address + n
-        } else {
-            self.memory_mapper.get_size()
-        };
-        */
         
         let max_address = address + n;
 

@@ -6,7 +6,6 @@ pub struct MemoryMapper {
     pub regions: Vec<Region>,
 }
 
-#[derive()]
 pub struct Region {
     pub device: Box<dyn Device>,
     pub start: Word,
@@ -14,6 +13,7 @@ pub struct Region {
     pub remap: bool,
 }
 
+#[allow(dead_code)]
 impl MemoryMapper {
     pub fn new() -> MemoryMapper {
         MemoryMapper {

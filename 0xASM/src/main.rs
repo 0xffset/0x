@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::convert::TryInto;
 use std::env;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
@@ -130,6 +131,13 @@ fn parse_line(
             // add the location of the label and the labels name for later and fill it with 0xFFFF FFFF FFFF FFFF
             jump_label_locations.push((*total_bytes_written, operand[1..].to_string()));
             write_output_word(output, Word::MAX, total_bytes_written)?;
+        } else if operand.starts_with("'") {
+            // parse char literals (single quotes) and write as little endian bytes
+            let mut op = operand.trim_matches('\'').as_bytes().to_vec();
+            for _ in 0..4 - op.len() {
+                op.push(0);
+            }
+            write_output_word(output, Word::from_le_bytes(op.clone().try_into().expect("Failed to convert char literal to Word")), total_bytes_written)?;
         } else {
             write_parsed_number(output, total_bytes_written, operand, "", 10, "dec", n)?;
         }
