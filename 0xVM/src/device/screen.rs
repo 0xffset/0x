@@ -99,7 +99,7 @@ impl Device for Screen {
 
     fn set_byte(&mut self, _: Word, _: Byte) {}
 
-    fn set_word(&mut self, address: Word, word: Word) {
+    fn set_word(&mut self, addr: Word, word: Word) {
         match word {
             0xF4_80_80_80 => self.clear_screen(),
             0xF4_80_80_81 => self.reset(),
@@ -114,8 +114,8 @@ impl Device for Screen {
             0xF4_80_80_8A => self.set_strikethrough(),
             0xF4_80_80_8B => self.unset_strikethrough(),
             _ => {
-                let x = ((address & 0x0000FFFF) % self.width as Word) + 1;
-                let y = ((address & 0x0000FFFF) / self.height as Word) + 1;
+                let x = ((addr & 0x0000FFFF) % self.width as Word) + 1;
+                let y = ((addr & 0x0000FFFF) / self.height as Word) + 1;
                 self.move_to(x * 2, y);
 
                 self.write(&word.to_le_bytes());

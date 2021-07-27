@@ -21,52 +21,52 @@ impl MemoryMapper {
         }
     }
 
-    fn find_region(&self, address: Word) -> usize {
+    fn find_region(&self, addr: Word) -> usize {
         for (i, region) in self.regions.iter().enumerate() {
-            if region.start <= address && address < region.end {
+            if region.start <= addr && addr < region.end {
                 return i;
             }
         }
-        panic!("[MEMORY MAPPER] No such region: '0x{:08X}'", address);
+        panic!("[MEMORY MAPPER] No such region: '0x{:08X}'", addr);
     }
 
-    fn get_region_and_address(&self, address: Word) -> (usize, Word) {
-        let region_index = self.find_region(address);
-        let final_address = if self.regions[region_index].remap {
-            address - self.regions[region_index].start
+    fn get_region_and_addr(&self, addr: Word) -> (usize, Word) {
+        let region_index = self.find_region(addr);
+        let final_addr = if self.regions[region_index].remap {
+            addr - self.regions[region_index].start
         } else {
-            address
+            addr
         };
 
-        (region_index, final_address)
+        (region_index, final_addr)
     }
 
-    pub fn get_word(&self, address: Word) -> Word {
-        let (region_index, final_address) = self.get_region_and_address(address);
+    pub fn get_word(&self, addr: Word) -> Word {
+        let (region_index, final_addr) = self.get_region_and_addr(addr);
 
-        self.regions[region_index].device.get_word(final_address)
+        self.regions[region_index].device.get_word(final_addr)
     }
 
-    pub fn get_byte(&self, address: Word) -> Byte {
-        let (region_index, final_address) = self.get_region_and_address(address);
+    pub fn get_byte(&self, addr: Word) -> Byte {
+        let (region_index, final_addr) = self.get_region_and_addr(addr);
 
-        self.regions[region_index].device.get_byte(final_address)
+        self.regions[region_index].device.get_byte(final_addr)
     }
 
-    pub fn set_word(&mut self, address: Word, value: Word) {
-        let (region_index, final_address) = self.get_region_and_address(address);
+    pub fn set_word(&mut self, addr: Word, value: Word) {
+        let (region_index, final_addr) = self.get_region_and_addr(addr);
 
         self.regions[region_index]
             .device
-            .set_word(final_address, value);
+            .set_word(final_addr, value);
     }
 
-    pub fn set_byte(&mut self, address: Word, value: Byte) {
-        let (region_index, final_address) = self.get_region_and_address(address);
+    pub fn set_byte(&mut self, addr: Word, value: Byte) {
+        let (region_index, final_addr) = self.get_region_and_addr(addr);
 
         self.regions[region_index]
             .device
-            .set_byte(final_address, value);
+            .set_byte(final_addr, value);
     }
 
     pub fn map(&mut self, device: Box<dyn Device>, start: Word, end: Word, remap: bool)

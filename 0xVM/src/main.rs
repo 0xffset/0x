@@ -66,5 +66,5 @@ fn main() {
 
     cpu.run();
     // debug
-    //cpu.run_debug(0xFFFF - 70, 70);
+    // cpu.run_debug(0xFFFF - 70, 70);
 }
