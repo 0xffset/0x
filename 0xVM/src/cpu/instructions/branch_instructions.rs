@@ -53,7 +53,7 @@ macro_rules! instr {
 
 /// ## BRBS FLAG_Z, 0xAF
 /// If the flag Z is set, jump to 0xAF
-#[inline(always)]
+#[inline]
 pub fn brbs(cpu: &mut CPU) {
     let flag = cpu.fetch_byte();
     let addr = cpu.fetch_word();
@@ -64,7 +64,7 @@ pub fn brbs(cpu: &mut CPU) {
 
 /// ## BRBC FLAG_Z, 0xAF
 /// If the flag Z is clear, jump to 0xAF
-#[inline(always)]
+#[inline]
 pub fn brbc(cpu: &mut CPU) {
     let flag = cpu.fetch_byte();
     let addr = cpu.fetch_word();
@@ -75,168 +75,168 @@ pub fn brbc(cpu: &mut CPU) {
 
 /// ## BREQ 0x1234, 0x5
 /// Jump to 0x5 if acc does equal 0x1234
-#[inline(always)]
+#[inline]
 pub fn breq(cpu: &mut CPU) {
     instr!(cpu, w, ==);
 }
 
 /// ## BREQR r1, 0x5
 /// Jump to 0x5 if acc does equal register r1
-#[inline(always)]
+#[inline]
 pub fn breqr(cpu: &mut CPU) {
     instr!(cpu, r, ==);
 }
 
 /// ## BREQRW r1, 0x1234, 0x5
 /// Jump to 0x5 if register r1 does equal 0x1234
-#[inline(always)]
+#[inline]
 pub fn breqrw(cpu: &mut CPU) {
     instr!(cpu, rw, ==);
 }
 
 /// ## BREQRR r1, r2, 0x5
 /// Jump to 0x5 if register r1 does equal register r2
-#[inline(always)]
+#[inline]
 pub fn breqrr(cpu: &mut CPU) {
     instr!(cpu, rr, ==);
 }
 
 /// ## BRNQ 0x1234, 0x5
 /// Jump to 0x5 if acc does not equal 0x1234
-#[inline(always)]
+#[inline]
 pub fn brnq(cpu: &mut CPU) {
     instr!(cpu, w, !=);
 }
 
 /// ## BRNQR r1, 0x5
 /// Jump to 0x5 if acc does not equal register r1
-#[inline(always)]
+#[inline]
 pub fn brnqr(cpu: &mut CPU) {
     instr!(cpu, r, !=);
 }
 
 /// ## BRNQRW r1, 0x1234, 0x5
 /// Jump to 0x5 if register r1 does not equal 0x1234
-#[inline(always)]
+#[inline]
 pub fn brnqrw(cpu: &mut CPU) {
     instr!(cpu, rw, !=);
 }
 
 /// ## BRNQRR r1, r2, 0x5
 /// Jump to 0x5 if register r1 does not equal register r2
-#[inline(always)]
+#[inline]
 pub fn brnqrr(cpu: &mut CPU) {
     instr!(cpu, rr, !=);
 }
 
 /// ## BRLT 0x1234, 0x5
 /// Jump to 0x5 if acc is less than 0x1234
-#[inline(always)]
+#[inline]
 pub fn brlt(cpu: &mut CPU) {
     instr!(cpu, w, <);
 }
 
 /// ## BRLTR r1, 0x5
 /// Jump to 0x5 if acc is less than register r1
-#[inline(always)]
+#[inline]
 pub fn brltr(cpu: &mut CPU) {
     instr!(cpu, r, <);
 }
 
 /// ## BRLTRW r1, 0x1234, 0x5
 /// Jump to 0x5 if register r1 is less than 0x1234
-#[inline(always)]
+#[inline]
 pub fn brltrw(cpu: &mut CPU) {
     instr!(cpu, rw, <);
 }
 
 /// ## BRLTRR r1, r2, 0x5
 /// Jump to 0x5 if register r1 is less than register r2
-#[inline(always)]
+#[inline]
 pub fn brltrr(cpu: &mut CPU) {
     instr!(cpu, rr, <);
 }
 
 /// ## BRGT 0x1234, 0x5
 /// Jump to 0x5 if acc is greater than 0x1234
-#[inline(always)]
+#[inline]
 pub fn brgt(cpu: &mut CPU) {
     instr!(cpu, w, >);
 }
 
 /// ## BRGTR r1, 0x5
 /// Jump to 0x5 if acc is greater than register r1
-#[inline(always)]
+#[inline]
 pub fn brgtr(cpu: &mut CPU) {
     instr!(cpu, r, >);
 }
 
 /// ## BRGTRW r1, 0x1234, 0x5
 /// Jump to 0x5 if register r1 is greater than 0x1234
-#[inline(always)]
+#[inline]
 pub fn brgtrw(cpu: &mut CPU) {
     instr!(cpu, rw, >);
 }
 
 /// ## BRGTRR r1, r2, 0x5
 /// Jump to 0x5 if register r1 is greater than register r2
-#[inline(always)]
+#[inline]
 pub fn brgtrr(cpu: &mut CPU) {
     instr!(cpu, rr, >);
 }
 
 /// ## BRLTE 0x1234, 0x5
 /// Jump to 0x5 if acc is less than or equal 0x1234
-#[inline(always)]
+#[inline]
 pub fn brlte(cpu: &mut CPU) {
     instr!(cpu, w, <=);
 }
 
 /// ## BRLTER r1, 0x5
 /// Jump to 0x5 if acc is less than or equal register r1
-#[inline(always)]
+#[inline]
 pub fn brlter(cpu: &mut CPU) {
     instr!(cpu, r, <=);
 }
 
 /// ## BRLTERW r1, 0x1234, 0x5
 /// Jump to 0x5 if register r1 is less than or equal 0x1234
-#[inline(always)]
+#[inline]
 pub fn brlterw(cpu: &mut CPU) {
     instr!(cpu, rw, <=);
 }
 
 /// ## BRLTERR r1, r2, 0x5
 /// Jump to 0x5 if register r1 is less than register or equal r2
-#[inline(always)]
+#[inline]
 pub fn brlterr(cpu: &mut CPU) {
     instr!(cpu, rr, <=);
 }
 
 /// ## BRGTE 0x1234, 0x5
 /// Jump to 0x5 if acc is greater than or equal 0x1234
-#[inline(always)]
+#[inline]
 pub fn brgte(cpu: &mut CPU) {
     instr!(cpu, w, >=);
 }
 
 /// ## BRGTER r1, 0x5
 /// Jump to 0x5 if acc is greater than register or equal r1
-#[inline(always)]
+#[inline]
 pub fn brgter(cpu: &mut CPU) {
     instr!(cpu, r, >=);
 }
 
 /// ## BRGTERW r1, 0x1234, 0x5
 /// Jump to 0x5 if register r1 is greater than or equal 0x1234
-#[inline(always)]
+#[inline]
 pub fn brgterw(cpu: &mut CPU) {
     instr!(cpu, rw, >=);
 }
 
 /// ## BRGTERR r1, r2, 0x5
 /// Jump to 0x5 if register r1 is greater than or equal register r2
-#[inline(always)]
+#[inline]
 pub fn brgterr(cpu: &mut CPU) {
     instr!(cpu, rr, >=);
 }

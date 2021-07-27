@@ -54,16 +54,19 @@ impl CPU {
     /// get_status_flag(1);
     /// // returns `true` if bit 1 is set
     /// ```
+    #[inline]
     pub fn get_status_flag(&self, n: Byte) -> bool {
         self.get_reg(reg!("sr")) & (1u32.wrapping_shl(n as Word)) != 0
     }
 
     /// Gets the val of the register with the given addr.
+    #[inline]
     pub fn get_reg(&self, addr: Word) -> Word {
         self.registers.get_word(addr)
     }
 
     /// Sets the val of the register with the given addr.
+    #[inline]
     pub fn set_reg(&mut self, addr: Word, val: Word) {
         self.registers.set_word(addr, val);
     }

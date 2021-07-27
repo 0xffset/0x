@@ -4,7 +4,7 @@ use crate::cpu::CPU;
 
 /// ## JMP 0xAF
 /// Jumps to addr 0xAF
-#[inline(always)]
+#[inline]
 pub fn jmp(cpu: &mut CPU) {
 	let addr = cpu.fetch_word();
 
@@ -13,7 +13,7 @@ pub fn jmp(cpu: &mut CPU) {
 
 /// ## CALL 0xAF 
 /// Call subroutine at 0xAF
-#[inline(always)]
+#[inline]
 pub fn call(cpu: &mut CPU) {
 	let addr = cpu.fetch_word();
 
@@ -24,7 +24,7 @@ pub fn call(cpu: &mut CPU) {
 
 /// ## CALLR r1 
 /// Call subroutine at r1
-#[inline(always)]
+#[inline]
 pub fn callr(cpu: &mut CPU) {
 	let r_addr = cpu.fetch_word();
 	let addr = cpu.get_reg(r_addr);
@@ -36,7 +36,7 @@ pub fn callr(cpu: &mut CPU) {
 
 /// ## RET 
 /// Return from subroutine
-#[inline(always)]
+#[inline]
 pub fn ret(cpu: &mut CPU) {
 	cpu.pop_state();
 }

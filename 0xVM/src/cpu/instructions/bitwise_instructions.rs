@@ -72,105 +72,105 @@ macro_rules! instr {
 
 /// ## LSF r1, 0x4
 /// Shift register r1 left by 0x4
-#[inline(always)]
+#[inline]
 pub fn lsf(cpu: &mut CPU) {
     instr!(cpu, rw, wrapping_shl);
 }
 
 /// ## LSFR r1, r2
 /// Shift register r1 left by register r2
-#[inline(always)]
+#[inline]
 pub fn lsfr(cpu: &mut CPU) {
     instr!(cpu, rr, wrapping_shl);
 }
 
 /// ## RSF r1, 0x4
 /// Shift register r1 right by 0x4
-#[inline(always)]
+#[inline]
 pub fn rsf(cpu: &mut CPU) {
     instr!(cpu, rw, wrapping_shr);
 }
 
 /// ## RSFR r1, r2
 /// Shift register r1 right by register r2
-#[inline(always)]
+#[inline]
 pub fn rsfr(cpu: &mut CPU) {
     instr!(cpu, rr, wrapping_shr);
 }
 
 /// ## WLSF r1, 0x4
 /// Shift register r1 left by 0x4 wrapping around
-#[inline(always)]
+#[inline]
 pub fn wlsf(cpu: &mut CPU) {
     instr!(cpu, rw, rotate_left);
 }
 
 /// ## WLSFR r1, r2
 /// Shift register r1 left by register r2 wrapping around
-#[inline(always)]
+#[inline]
 pub fn wlsfr(cpu: &mut CPU) {
     instr!(cpu, rr, rotate_left);
 }
 
 /// ## WRSF r1, 0x4
 /// Shift register r1 right by 0x4 wrapping around
-#[inline(always)]
+#[inline]
 pub fn wrsf(cpu: &mut CPU) {
     instr!(cpu, rw, rotate_right);
 }
 
 /// ## WRSFR r1, r2
 /// Shift register r1 right by register r2 wrapping around
-#[inline(always)]
+#[inline]
 pub fn wrsfr(cpu: &mut CPU) {
     instr!(cpu, rr, rotate_right);
 }
 
 /// ## AND r1, 0x4
 /// Bitwise AND register r1 with 0x4
-#[inline(always)]
+#[inline]
 pub fn and(cpu: &mut CPU) {
     instr!(cpu, rw, &);
 }
 
 /// ## ANDR r1, r2
 /// Bitwise AND register r1 with register r2
-#[inline(always)]
+#[inline]
 pub fn andr(cpu: &mut CPU) {
     instr!(cpu, rr, &);
 }
 
 /// ## OR r1, 0x4
 /// Bitwise OR register r1 with 0x4
-#[inline(always)]
+#[inline]
 pub fn or(cpu: &mut CPU) {
 	instr!(cpu, rw, |);
 }
 
 /// ## ORR r1, r2
 /// Bitwise OR register r1 with register r2
-#[inline(always)]
+#[inline]
 pub fn orr(cpu: &mut CPU) {
 	instr!(cpu, rr, |);
 }
 
 /// ## XOR r1, 0x4
 /// Bitwise XOR register r1 with 0x4
-#[inline(always)]
+#[inline]
 pub fn xor(cpu: &mut CPU) {
 	instr!(cpu, rw, ^);
 }
 
 /// ## XORR r1, r2
 /// Bitwise XOR register r1 with register r2
-#[inline(always)]
+#[inline]
 pub fn xorr(cpu: &mut CPU) {
 	instr!(cpu, rr, ^);
 }
 
 /// ## NOT r1
 /// Bitwise NOT register r1
-#[inline(always)]
+#[inline]
 pub fn not(cpu: &mut CPU) {
     let r_addr = cpu.fetch_word();
     let register_val = cpu.get_reg(r_addr);

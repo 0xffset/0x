@@ -2,7 +2,7 @@ use crate::cpu::CPU;
 
 /// ## MOVR 0x1234, r1
 /// Move 0x1234 into register r1
-#[inline(always)]
+#[inline]
 pub fn movr(cpu: &mut CPU) {
     let val = cpu.fetch_word();
     let r_addr = cpu.fetch_word();
@@ -11,7 +11,7 @@ pub fn movr(cpu: &mut CPU) {
 
 /// ## MOVM 0x1234, 0xAF
 /// Move 0x1234 into memory at 0xAF
-#[inline(always)]
+#[inline]
 pub fn movm(cpu: &mut CPU) {
     let val = cpu.fetch_word();
     let m_addr = cpu.fetch_word();
@@ -20,7 +20,7 @@ pub fn movm(cpu: &mut CPU) {
 
 /// ## MOVRR r1, r2
 /// Move register r1 into register r2
-#[inline(always)]
+#[inline]
 pub fn movrr(cpu: &mut CPU) {
     let r1_addr = cpu.fetch_word();
     let r2_addr = cpu.fetch_word();
@@ -29,7 +29,7 @@ pub fn movrr(cpu: &mut CPU) {
 
 /// ## MOVRM r1, 0xAF
 /// Move register r1 into memory ar 0xAF
-#[inline(always)]
+#[inline]
 pub fn movrm(cpu: &mut CPU) {
     let r_addr = cpu.fetch_word();
     let m_addr = cpu.fetch_word();
@@ -39,7 +39,7 @@ pub fn movrm(cpu: &mut CPU) {
 
 /// ## MOVMR 0xAF, r1
 /// Move memory at 0xAF into register r1
-#[inline(always)]
+#[inline]
 pub fn movmr(cpu: &mut CPU) {
     let m_addr = cpu.fetch_word();
     let r_addr = cpu.fetch_word();
@@ -48,7 +48,7 @@ pub fn movmr(cpu: &mut CPU) {
 
 /// ## MOVRPR r1, r2
 /// Move data pointed at by register r1 into register r2
-#[inline(always)]
+#[inline]
 pub fn movrpr(cpu: &mut CPU) {
     let r1_addr = cpu.fetch_word();
     let r2_addr = cpu.fetch_word();
@@ -59,7 +59,7 @@ pub fn movrpr(cpu: &mut CPU) {
 
 /// ## MOVROR r1, 0x2, r2
 /// Move data pointed at by register r1 plus an offset 0x2 into register r2
-#[inline(always)]
+#[inline]
 pub fn movror(cpu: &mut CPU) {
     let r1_addr = cpu.fetch_word();
     let offset = cpu.fetch_word();
