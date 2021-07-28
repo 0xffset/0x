@@ -2,11 +2,10 @@ use macros::reg;
 
 use crate::cpu::CPU;
 
-#[allow(non_snake_case)]
-
 /// ## JMP 0xAF
 /// Jumps to addr 0xAF
 #[inline]
+#[allow(non_snake_case)]
 pub fn JMP(cpu: &mut CPU) {
 	let addr = cpu.fetch_word();
 
@@ -16,6 +15,7 @@ pub fn JMP(cpu: &mut CPU) {
 /// ## CALL 0xAF 
 /// Call subroutine at 0xAF
 #[inline]
+#[allow(non_snake_case)]
 pub fn CALL(cpu: &mut CPU) {
 	let addr = cpu.fetch_word();
 
@@ -27,6 +27,7 @@ pub fn CALL(cpu: &mut CPU) {
 /// ## CALLR r1 
 /// Call subroutine at r1
 #[inline]
+#[allow(non_snake_case)]
 pub fn CALLR(cpu: &mut CPU) {
 	let r_addr = cpu.fetch_word();
 	let addr = cpu.get_reg(r_addr);
@@ -39,6 +40,7 @@ pub fn CALLR(cpu: &mut CPU) {
 /// ## RET 
 /// Return from subroutine
 #[inline]
+#[allow(non_snake_case)]
 pub fn RET(cpu: &mut CPU) {
 	cpu.pop_state();
 }

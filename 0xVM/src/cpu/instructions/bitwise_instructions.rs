@@ -70,11 +70,10 @@ macro_rules! instr {
     };
 }
 
-#[allow(non_snake_case)]
-
 /// ## LSF r1, 0x4
 /// Shift register r1 left by 0x4
 #[inline]
+#[allow(non_snake_case)]
 pub fn LSF(cpu: &mut CPU) {
     instr!(cpu, rw, wrapping_shl);
 }
@@ -82,6 +81,7 @@ pub fn LSF(cpu: &mut CPU) {
 /// ## LSFR r1, r2
 /// Shift register r1 left by register r2
 #[inline]
+#[allow(non_snake_case)]
 pub fn LSFR(cpu: &mut CPU) {
     instr!(cpu, rr, wrapping_shl);
 }
@@ -89,6 +89,7 @@ pub fn LSFR(cpu: &mut CPU) {
 /// ## RSF r1, 0x4
 /// Shift register r1 right by 0x4
 #[inline]
+#[allow(non_snake_case)]
 pub fn RSF(cpu: &mut CPU) {
     instr!(cpu, rw, wrapping_shr);
 }
@@ -96,6 +97,7 @@ pub fn RSF(cpu: &mut CPU) {
 /// ## RSFR r1, r2
 /// Shift register r1 right by register r2
 #[inline]
+#[allow(non_snake_case)]
 pub fn RSFR(cpu: &mut CPU) {
     instr!(cpu, rr, wrapping_shr);
 }
@@ -103,6 +105,7 @@ pub fn RSFR(cpu: &mut CPU) {
 /// ## WLSF r1, 0x4
 /// Shift register r1 left by 0x4 wrapping around
 #[inline]
+#[allow(non_snake_case)]
 pub fn WLSF(cpu: &mut CPU) {
     instr!(cpu, rw, rotate_left);
 }
@@ -110,6 +113,7 @@ pub fn WLSF(cpu: &mut CPU) {
 /// ## WLSFR r1, r2
 /// Shift register r1 left by register r2 wrapping around
 #[inline]
+#[allow(non_snake_case)]
 pub fn WLSFR(cpu: &mut CPU) {
     instr!(cpu, rr, rotate_left);
 }
@@ -117,6 +121,7 @@ pub fn WLSFR(cpu: &mut CPU) {
 /// ## WRSF r1, 0x4
 /// Shift register r1 right by 0x4 wrapping around
 #[inline]
+#[allow(non_snake_case)]
 pub fn WRSF(cpu: &mut CPU) {
     instr!(cpu, rw, rotate_right);
 }
@@ -124,6 +129,7 @@ pub fn WRSF(cpu: &mut CPU) {
 /// ## WRSFR r1, r2
 /// Shift register r1 right by register r2 wrapping around
 #[inline]
+#[allow(non_snake_case)]
 pub fn WRSFR(cpu: &mut CPU) {
     instr!(cpu, rr, rotate_right);
 }
@@ -131,6 +137,7 @@ pub fn WRSFR(cpu: &mut CPU) {
 /// ## AND r1, 0x4
 /// Bitwise AND register r1 with 0x4
 #[inline]
+#[allow(non_snake_case)]
 pub fn AND(cpu: &mut CPU) {
     instr!(cpu, rw, &);
 }
@@ -138,6 +145,7 @@ pub fn AND(cpu: &mut CPU) {
 /// ## ANDR r1, r2
 /// Bitwise AND register r1 with register r2
 #[inline]
+#[allow(non_snake_case)]
 pub fn ANDR(cpu: &mut CPU) {
     instr!(cpu, rr, &);
 }
@@ -145,6 +153,7 @@ pub fn ANDR(cpu: &mut CPU) {
 /// ## OR r1, 0x4
 /// Bitwise OR register r1 with 0x4
 #[inline]
+#[allow(non_snake_case)]
 pub fn OR(cpu: &mut CPU) {
 	instr!(cpu, rw, |);
 }
@@ -152,6 +161,7 @@ pub fn OR(cpu: &mut CPU) {
 /// ## ORR r1, r2
 /// Bitwise OR register r1 with register r2
 #[inline]
+#[allow(non_snake_case)]
 pub fn ORR(cpu: &mut CPU) {
 	instr!(cpu, rr, |);
 }
@@ -159,6 +169,7 @@ pub fn ORR(cpu: &mut CPU) {
 /// ## XOR r1, 0x4
 /// Bitwise XOR register r1 with 0x4
 #[inline]
+#[allow(non_snake_case)]
 pub fn XOR(cpu: &mut CPU) {
 	instr!(cpu, rw, ^);
 }
@@ -166,6 +177,7 @@ pub fn XOR(cpu: &mut CPU) {
 /// ## XORR r1, r2
 /// Bitwise XOR register r1 with register r2
 #[inline]
+#[allow(non_snake_case)]
 pub fn XORR(cpu: &mut CPU) {
 	instr!(cpu, rr, ^);
 }
@@ -173,6 +185,7 @@ pub fn XORR(cpu: &mut CPU) {
 /// ## NOT r1
 /// Bitwise NOT register r1
 #[inline]
+#[allow(non_snake_case)]
 pub fn NOT(cpu: &mut CPU) {
     let r_addr = cpu.fetch_word();
     let register_val = cpu.get_reg(r_addr);

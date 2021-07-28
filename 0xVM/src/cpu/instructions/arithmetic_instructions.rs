@@ -54,11 +54,10 @@ macro_rules! instr {
     };
 }
 
-#[allow(non_snake_case)]
-
 /// ## ADD 0x1234, r1
 /// Add 0x1234 to register r1 and store the result in acc
 #[inline]
+#[allow(non_snake_case)]
 pub fn ADD(cpu: &mut CPU) {
     instr!(cpu, wr, wrapping_add);
 }
@@ -66,6 +65,7 @@ pub fn ADD(cpu: &mut CPU) {
 /// ## ADDR r1, r2
 /// Add register r1 and register r2 and store the result in acc
 #[inline]
+#[allow(non_snake_case)]
 pub fn ADDR(cpu: &mut CPU) {
     instr!(cpu, rr, wrapping_add);
 }
@@ -73,6 +73,7 @@ pub fn ADDR(cpu: &mut CPU) {
 /// ## SUB r1, 0x1234
 /// Subtract 0x1234 from register r1 and store the result in acc
 #[inline]
+#[allow(non_snake_case)]
 pub fn SUB(cpu: &mut CPU) {
     instr!(cpu, rw, wrapping_sub);
 }
@@ -80,6 +81,7 @@ pub fn SUB(cpu: &mut CPU) {
 /// ## SUBWR 0x1234, r1
 /// Subtract register r1 from 0x1234 and store the result in acc
 #[inline]
+#[allow(non_snake_case)]
 pub fn SUBWR(cpu: &mut CPU) {
     instr!(cpu, wr, wrapping_sub);
 }
@@ -87,6 +89,7 @@ pub fn SUBWR(cpu: &mut CPU) {
 /// ## SUBR r1, r2
 /// Subtract register r2 from register r1 and store the result in acc
 #[inline]
+#[allow(non_snake_case)]
 pub fn SUBR(cpu: &mut CPU) {
     instr!(cpu, rr, wrapping_sub);
 }
@@ -94,6 +97,7 @@ pub fn SUBR(cpu: &mut CPU) {
 /// ## MULT 0x1234, r1
 /// Multiply register r1 by 0x1234 and store the result in acc
 #[inline]
+#[allow(non_snake_case)]
 pub fn MULT(cpu: &mut CPU) {
     instr!(cpu, wr, wrapping_mul);
 }
@@ -101,6 +105,7 @@ pub fn MULT(cpu: &mut CPU) {
 /// ## MULTR r1, r2
 /// Multiply register r2 by register r1 and store the result in acc
 #[inline]
+#[allow(non_snake_case)]
 pub fn MULTR(cpu: &mut CPU) {
     instr!(cpu, rr, wrapping_mul);
 }
@@ -109,6 +114,7 @@ pub fn MULTR(cpu: &mut CPU) {
 /// Divide register r1 by 0x1234 and store the result in acc
 /// #### Panics if the divisor is 0
 #[inline]
+#[allow(non_snake_case)]
 pub fn DIV(cpu: &mut CPU) {
     instr!(cpu, rw, wrapping_div);
 }
@@ -117,6 +123,7 @@ pub fn DIV(cpu: &mut CPU) {
 /// Divide 0x1234 by register r1 and store the result in acc
 /// #### Panics if the divisor is 0
 #[inline]
+#[allow(non_snake_case)]
 pub fn DIVWR(cpu: &mut CPU) {
     instr!(cpu, wr, wrapping_div);
 }
@@ -125,6 +132,7 @@ pub fn DIVWR(cpu: &mut CPU) {
 /// Divide register r2 by register r1 and store the result in acc
 /// #### Panics if the divisor is 0
 #[inline]
+#[allow(non_snake_case)]
 pub fn DIVR(cpu: &mut CPU) {
     instr!(cpu, rr, wrapping_div);
 }
@@ -132,6 +140,7 @@ pub fn DIVR(cpu: &mut CPU) {
 /// ## INC r1
 /// Increment register r1 and store the result in acc
 #[inline]
+#[allow(non_snake_case)]
 pub fn INC(cpu: &mut CPU) {
 	instr!(cpu, cc, wrapping_add);
 }
@@ -139,6 +148,7 @@ pub fn INC(cpu: &mut CPU) {
 /// ## DEC r1
 /// Decrement register r1 and store the result in acc
 #[inline]
+#[allow(non_snake_case)]
 pub fn DEC(cpu: &mut CPU) {
     instr!(cpu, cc, wrapping_sub);
 }

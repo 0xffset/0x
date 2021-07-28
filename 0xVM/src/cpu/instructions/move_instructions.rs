@@ -1,10 +1,9 @@
 use crate::cpu::CPU;
 
-#[allow(non_snake_case)]
-
 /// ## MOVR 0x1234, r1
 /// Move 0x1234 into register r1
 #[inline]
+#[allow(non_snake_case)]
 pub fn MOVR(cpu: &mut CPU) {
     let val = cpu.fetch_word();
     let r_addr = cpu.fetch_word();
@@ -14,6 +13,7 @@ pub fn MOVR(cpu: &mut CPU) {
 /// ## MOVM 0x1234, 0xAF
 /// Move 0x1234 into memory at 0xAF
 #[inline]
+#[allow(non_snake_case)]
 pub fn MOVM(cpu: &mut CPU) {
     let val = cpu.fetch_word();
     let m_addr = cpu.fetch_word();
@@ -23,6 +23,7 @@ pub fn MOVM(cpu: &mut CPU) {
 /// ## MOVRR r1, r2
 /// Move register r1 into register r2
 #[inline]
+#[allow(non_snake_case)]
 pub fn MOVRR(cpu: &mut CPU) {
     let r1_addr = cpu.fetch_word();
     let r2_addr = cpu.fetch_word();
@@ -32,6 +33,7 @@ pub fn MOVRR(cpu: &mut CPU) {
 /// ## MOVRM r1, 0xAF
 /// Move register r1 into memory ar 0xAF
 #[inline]
+#[allow(non_snake_case)]
 pub fn MOVRM(cpu: &mut CPU) {
     let r_addr = cpu.fetch_word();
     let m_addr = cpu.fetch_word();
@@ -42,6 +44,7 @@ pub fn MOVRM(cpu: &mut CPU) {
 /// ## MOVMR 0xAF, r1
 /// Move memory at 0xAF into register r1
 #[inline]
+#[allow(non_snake_case)]
 pub fn MOVMR(cpu: &mut CPU) {
     let m_addr = cpu.fetch_word();
     let r_addr = cpu.fetch_word();
@@ -51,6 +54,7 @@ pub fn MOVMR(cpu: &mut CPU) {
 /// ## MOVRPR r1, r2
 /// Move data pointed at by register r1 into register r2
 #[inline]
+#[allow(non_snake_case)]
 pub fn MOVRPR(cpu: &mut CPU) {
     let r1_addr = cpu.fetch_word();
     let r2_addr = cpu.fetch_word();
@@ -62,6 +66,7 @@ pub fn MOVRPR(cpu: &mut CPU) {
 /// ## MOVROR r1, 0x2, r2
 /// Move data pointed at by register r1 plus an offset 0x2 into register r2
 #[inline]
+#[allow(non_snake_case)]
 pub fn MOVROR(cpu: &mut CPU) {
     let r1_addr = cpu.fetch_word();
     let offset = cpu.fetch_word();
