@@ -4,7 +4,18 @@ use crate::{
 };
 use macros::reg;
 
-use super::{instr_codes::*, instructions::*};
+use super::instructions::*;
+
+macro_rules! generate_execute {
+    ($self:ident, $instr:ident, $([$(($op:literal, $instr_func:ident)),+]),+) => {
+        match $instr {
+            0xFF => $self.halt_signal = true,
+            0x00 => {},
+            $($($op => $instr_func($self),)*)*
+            _ => panic!("[CPU] No such instruction: '0x{:02X}'", $instr)
+        }
+    };
+}
 
 pub struct CPU {
     pub memory_mapper: MemoryMapper,
@@ -145,82 +156,87 @@ impl CPU {
     }
 
     fn execute(&mut self, instr: Byte) {
-        match instr {
-            instr_codes::HALT => {
-                self.halt_signal = true;
-            }
-            instr_codes::NOP => {}
-            instr_codes::MOVR => movr(self),
-            instr_codes::MOVM => movm(self),
-            instr_codes::MOVRR => movrr(self),
-            instr_codes::MOVRM => movrm(self),
-            instr_codes::MOVMR => movmr(self),
-            instr_codes::MOVRPR => movrpr(self),
-            instr_codes::MOVROR => movror(self),
-            instr_codes::POP => pop(self),
-            instr_codes::PUSH => push(self),
-            instr_codes::PUSHR => pushr(self),
-            instr_codes::ADD => add(self),
-            instr_codes::ADDR => addr(self),
-            instr_codes::SUB => sub(self),
-            instr_codes::SUBWR => subwr(self),
-            instr_codes::SUBR => subr(self),
-            instr_codes::MULT => mult(self),
-            instr_codes::MULTR => multr(self),
-            instr_codes::DIV => div(self),
-            instr_codes::DIVWR => divwr(self),
-            instr_codes::DIVR => divr(self),
-            instr_codes::INC => inc(self),
-            instr_codes::DEC => dec(self),
-            instr_codes::LSF => lsf(self),
-            instr_codes::LSFR => lsfr(self),
-            instr_codes::RSF => rsf(self),
-            instr_codes::RSFR => rsfr(self),
-            instr_codes::WLSF => wlsf(self),
-            instr_codes::WLSFR => wlsfr(self),
-            instr_codes::WRSF => wrsf(self),
-            instr_codes::WRSFR => wrsfr(self),
-            instr_codes::AND => and(self),
-            instr_codes::ANDR => andr(self),
-            instr_codes::OR => or(self),
-            instr_codes::ORR => orr(self),
-            instr_codes::XOR => xor(self),
-            instr_codes::XORR => xorr(self),
-            instr_codes::NOT => not(self),
-            instr_codes::BRBS => brbs(self),
-            instr_codes::BRBC => brbc(self),
-            instr_codes::BREQ => breq(self),
-            instr_codes::BREQR => breqr(self),
-            instr_codes::BREQRW => breqrw(self),
-            instr_codes::BREQRR => breqrr(self),
-            instr_codes::BRNQ => brnq(self),
-            instr_codes::BRNQR => brnqr(self),
-            instr_codes::BRNQRW => brnqrw(self),
-            instr_codes::BRNQRR => brnqrr(self),
-            instr_codes::BRLT => brlt(self),
-            instr_codes::BRLTR => brltr(self),
-            instr_codes::BRLTRW => brltrw(self),
-            instr_codes::BRLTRR => brltrr(self),
-            instr_codes::BRGT => brgt(self),
-            instr_codes::BRGTR => brgtr(self),
-            instr_codes::BRGTRW => brgtrw(self),
-            instr_codes::BRGTRR => brgtrr(self),
-            instr_codes::BRLTE => brlte(self),
-            instr_codes::BRLTER => brlter(self),
-            instr_codes::BRLTERW => brlterw(self),
-            instr_codes::BRLTERR => brlterr(self),
-            instr_codes::BRGTE => brgte(self),
-            instr_codes::BRGTER => brgter(self),
-            instr_codes::BRGTERW => brgterw(self),
-            instr_codes::BRGTERR => brgterr(self),
-            instr_codes::JMP => jmp(self),
-            instr_codes::CALL => call(self),
-            instr_codes::CALLR => callr(self),
-            instr_codes::RET => ret(self),
-            _ => {
-                panic!("[CPU] No such instruction: '0x{:02X}'", instr);
-            }
-        }
+        generate_execute!(
+            self,
+            instr,
+            // move instructions
+            [
+                (0x10, movr),
+                (0x11, movm),
+                (0x12, movrr),
+                (0x13, movrm),
+                (0x14, movmr),
+                (0x17, movrpr),
+                (0x18, movror),
+                (0x05, pop),
+                (0x15, push),
+                (0x16, pushr)
+            ],
+            // sub routine instructions
+            [(0x01, jmp), (0x02, call), (0x03, callr), (0x04, ret)],
+            // arithmetic instructions
+            [
+                (0x20, add),
+                (0x21, addr),
+                (0x22, sub),
+                (0x23, subwr),
+                (0x24, subr),
+                (0x25, mult),
+                (0x26, multr),
+                (0x27, div),
+                (0x28, divwr),
+                (0x29, divr),
+                (0x2A, inc),
+                (0x2B, dec)
+            ],
+            // bitwise instructions
+            [
+                (0x50, lsf),
+                (0x51, lsfr),
+                (0x52, rsf),
+                (0x53, rsfr),
+                (0x54, wlsf),
+                (0x55, wlsfr),
+                (0x56, wrsf),
+                (0x57, wrsfr),
+                (0x58, and),
+                (0x59, andr),
+                (0x5A, or),
+                (0x5B, orr),
+                (0x5C, xor),
+                (0x5D, xorr),
+                (0x5E, not)
+            ],
+            // conditional instructions
+            [
+                (0x30, brbs),
+                (0x31, brbc),
+                (0x32, breq),
+                (0x33, breqr),
+                (0x34, breqrw),
+                (0x35, breqrr),
+                (0x36, brnq),
+                (0x37, brnqr),
+                (0x38, brnqrw),
+                (0x39, brnqrr),
+                (0x3A, brlt),
+                (0x3B, brltr),
+                (0x3C, brltrw),
+                (0x3D, brltrr),
+                (0x3E, brgt),
+                (0x3F, brgtr),
+                (0x40, brgtrw),
+                (0x41, brgtrr),
+                (0x42, brlte),
+                (0x43, brlter),
+                (0x44, brlterw),
+                (0x45, brlterr),
+                (0x46, brgte),
+                (0x47, brgter),
+                (0x48, brgterw),
+                (0x49, brgterr)
+            ]
+        );
     }
 
     /// Prints a view of all registers to the console
