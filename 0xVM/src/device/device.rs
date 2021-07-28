@@ -1,8 +1,5 @@
 use crate::memory::{Byte, Word};
 
-#[derive(Clone, PartialEq)]
-pub struct DeviceType;
-
 pub trait Device {
     fn get_word(&self, _: Word) -> Word {
         panic!("[DEVICE] Device didn't implement 'get_word()'");
@@ -18,5 +15,3 @@ pub trait Device {
         panic!("[DEVICE] Device didn't implement 'set_byte()'");
     }
 }
-
-impl Device for DeviceType {}
