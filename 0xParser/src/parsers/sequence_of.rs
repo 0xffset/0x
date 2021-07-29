@@ -1,39 +1,37 @@
 use crate::parser_objects::*;
 
-#[macro_export]
-macro_rules! sequence_of {
-    ($($parsers:expr),+) => {
-        |state| internal_sequence_of(
-            vec![
-                $($parsers),*
-            ],
-            state
-        )
-    };
+#[derive(Clone)]
+pub struct SequenceOfParser {
+    pub parsers: Vec<Box<dyn Parser>>,
 }
 
-pub fn internal_sequence_of(
-    parsers: Vec<fn(ParserState) -> ParserState>,
-    state: ParserState,
-) -> ParserState {
-    if state.is_err {
-        return state;
+impl SequenceOfParser {
+    pub fn new(parsers: Vec<Box<dyn Parser>>) -> Box<Self> {
+        Box::new(SequenceOfParser { parsers })
     }
+}
 
-    let mut results = Vec::new();
-    let mut next_state = state;
-
-    // apply every parser in order
-    for parser in &parsers {
-        next_state = parser(next_state.clone());
-
-        if next_state.is_err {
-            return next_state.update_state(0, Some(Box::new(ParserVecResult::new(results))));
+impl Parser for SequenceOfParser {
+    fn exec(&self, state: ParserState) -> ParserState {
+        if state.is_err {
+            return state;
         }
 
-        // push result
-        results.push(next_state.res.clone().unwrap());
-    }
+        let mut results = Vec::new();
+        let mut next_state = state;
 
-    return next_state.update_state(0, Some(Box::new(ParserVecResult::new(results))));
+        // apply every parser in order
+        for parser in &self.parsers {
+            next_state = parser.exec(next_state.clone());
+
+            if next_state.is_err {
+                return next_state.update_state(0, Some(Box::new(ParserVecResult::new(results))));
+            }
+
+            // push result
+            results.push(next_state.res.clone().unwrap());
+        }
+
+        return next_state.update_state(0, Some(Box::new(ParserVecResult::new(results))));
+    }
 }

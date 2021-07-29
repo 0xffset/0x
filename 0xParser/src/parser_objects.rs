@@ -17,16 +17,36 @@ macro_rules! obj {
 	};
 }
 
-pub struct Parser {
-    pub transformer: fn(ParserState) -> ParserState,
+// https://stackoverflow.com/a/30353928/12807712
+macro_rules! clone_boxed {
+    ($trait:ident, $clone:ident) => {
+        pub trait $clone {
+            fn clone_box(&self) -> Box<dyn $trait>;
+        }
+        impl<T> $clone for T
+        where
+            T: 'static + $trait + Clone,
+        {
+            fn clone_box(&self) -> Box<dyn $trait> {
+                Box::new(self.clone())
+            }
+        }
+
+        impl Clone for Box<dyn $trait> {
+            fn clone(&self) -> Box<dyn $trait> {
+                self.clone_box()
+            }
+        }
+    };
 }
 
-impl Parser {
-    pub fn new(transformer: fn(ParserState) -> ParserState) -> Self {
-        Parser { transformer }
-    }
-
-    pub fn run(&self, target: String) -> ParserState {
+// ##########
+// # Parser #
+// ##########
+clone_boxed!(Parser, ParserClone);
+pub trait Parser: ParserClone {
+    fn exec(&self, state: ParserState) -> ParserState;
+    fn run(&self, target: String) -> ParserState {
         let state = ParserState {
             input: target,
             index: 0,
@@ -35,10 +55,13 @@ impl Parser {
             err_msg: None,
         };
 
-        (self.transformer)(state)
+        self.exec(state)
     }
 }
 
+// ################
+// # Parser State #
+// ################
 #[derive(Debug, Clone)]
 pub struct ParserState {
     pub input: String,
@@ -48,9 +71,9 @@ pub struct ParserState {
     pub err_msg: Option<String>,
 }
 
-// scuffed way to compare two ParserStates
-// convert them to their string representation and compare them
 impl ParserState {
+	// scuffed way to compare two ParserStates
+	// convert them to their string representation and compare them
     pub fn get_bytes(&self) -> Vec<u8> {
         let bytes = format!("{:?}", self);
         bytes.as_bytes().to_vec()
@@ -75,30 +98,10 @@ impl ParserState {
     }
 }
 
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-// https://stackoverflow.com/a/30353928/12807712
-pub trait ParserResultClone {
-    fn clone_box(&self) -> Box<dyn ParserResult>;
-}
-
-impl<T> ParserResultClone for T
-where
-    T: 'static + ParserResult + Clone,
-{
-    fn clone_box(&self) -> Box<dyn ParserResult> {
-        Box::new(self.clone())
-    }
-}
-
-// We can now implement Clone manually by forwarding to clone_box.
-impl Clone for Box<dyn ParserResult> {
-    fn clone(&self) -> Box<dyn ParserResult> {
-        self.clone_box()
-    }
-}
-
-// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
+// ##################
+// # Parser Results #
+// ##################
+clone_boxed!(ParserResult, ParserResultClone);
 pub trait ParserResult: std::fmt::Debug + ParserResultClone {}
 
 obj!(ParserStringResult, value: String);

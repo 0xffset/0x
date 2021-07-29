@@ -1,41 +1,47 @@
-use crate::parser_objects::{ParserState, ParserStringResult};
+use crate::parser_objects::{Parser, ParserState, ParserStringResult};
 use crate::string_utils::StringUtils;
 
-#[macro_export]
-macro_rules! str {
-    ($target:expr) => {
-        |state| internal_str($target, state)
-    };
+#[derive(Clone)]
+pub struct StringParser {
+    pub target: String,
 }
 
-pub fn internal_str(target: &str, state: ParserState) -> ParserState {
-    if state.is_err {
-        return state;
+impl StringParser {
+    pub fn new(target: String) -> Box<Self> {
+        Box::new(StringParser { target: target })
     }
+}
 
-    // slice to current index in input
-    let input_slice = state.input.slice(state.index..);
+impl Parser for StringParser {
+    fn exec(&self, state: ParserState) -> ParserState {
+        if state.is_err {
+            return state;
+        }
 
-    // simple checks before expensive string matching
-    if input_slice.len() == 0 || input_slice.len() < target.len() {
+        // slice to current index in input
+        let input_slice = state.input.slice(state.index..);
+
+        // simple checks before expensive string matching
+        if input_slice.len() == 0 || input_slice.len() < self.target.len() {
+            return state.set_err(format!(
+                "[str] Tried to match '{}', but got unexpected end of input",
+                self.target
+            ));
+        }
+
+        // match the string
+        if input_slice.starts_with(&self.target) {
+            return state.update_state(
+                self.target.len(),
+                Some(Box::new(ParserStringResult::new(self.target.to_string()))),
+            );
+        }
+
+        // no match
         return state.set_err(format!(
-            "[str] Tried to match '{}', but got unexpected end of input",
-            target
+            "[str] Tried to match '{}', but got '{}'",
+            self.target,
+            input_slice.slice(..10)
         ));
     }
-
-    // match the string
-    if input_slice.starts_with(target) {
-        return state.update_state(
-            target.len(),
-            Some(Box::new(ParserStringResult::new(target.to_string()))),
-        );
-    }
-
-    // no match
-    return state.set_err(format!(
-        "[str] Tried to match '{}', but got '{}'",
-        target,
-        input_slice.slice(..10)
-    ));
 }
