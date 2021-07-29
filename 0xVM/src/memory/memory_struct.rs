@@ -13,13 +13,13 @@ pub struct Memory {
 
 #[allow(dead_code)]
 impl Memory {
-    pub fn new(size_in_bytes: Word) -> Memory {
+    pub fn new(size_in_bytes: Word) -> Self {
         Memory {
             data: vec![0; size_in_bytes as usize],
         }
     }
 
-    pub fn from(mut data: Vec<Byte>, total_size: Word) -> Memory {
+    pub fn from(mut data: Vec<Byte>, total_size: Word) -> Self {
         let buffer = if total_size > data.len() as Word {
             total_size - data.len() as Word
         } else {

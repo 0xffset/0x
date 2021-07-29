@@ -11,7 +11,7 @@ pub struct Screen {
 
 #[allow(dead_code)]
 impl Screen {
-    pub fn new(width: HalfWord, height: HalfWord) -> Screen {
+    pub fn new(width: HalfWord, height: HalfWord) -> Self {
         Screen { width, height }
     }
 

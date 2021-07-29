@@ -15,7 +15,7 @@ pub struct Region {
 
 #[allow(dead_code)]
 impl MemoryMapper {
-    pub fn new() -> MemoryMapper {
+    pub fn new() -> Self {
         MemoryMapper {
             regions: Vec::new(),
         }

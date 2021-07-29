@@ -26,7 +26,7 @@ pub struct CPU {
 
 #[allow(dead_code)]
 impl CPU {
-    pub fn new(memory_mapper: MemoryMapper) -> CPU {
+    pub fn new(memory_mapper: MemoryMapper) -> Self {
         let mut ret = CPU {
             memory_mapper,
             registers: Memory::new((crate::REGISTER_COUNT * 4) as u32),
