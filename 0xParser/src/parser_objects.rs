@@ -17,8 +17,26 @@ macro_rules! obj {
 	};
 }
 
-pub struct Parser<T> {
-	pub transformer: T
+pub struct Parser {
+    pub transformer: fn(ParserState) -> ParserState,
+}
+
+impl Parser {
+    pub fn new(transformer: fn(ParserState) -> ParserState) -> Self {
+        Parser { transformer }
+    }
+
+    pub fn run(&self, target: String) -> ParserState {
+        let state = ParserState {
+            input: target,
+            index: 0,
+            res: None,
+            is_err: false,
+            err_msg: None,
+        };
+
+        (self.transformer)(state)
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -33,24 +51,28 @@ pub struct ParserState {
 // scuffed way to compare two ParserStates
 // convert them to their string representation and compare them
 impl ParserState {
-	pub fn get_bytes(&self) -> Vec<u8> {
-		let bytes = format!("{:?}", self);
-		bytes.as_bytes().to_vec()
-	}
+    pub fn get_bytes(&self) -> Vec<u8> {
+        let bytes = format!("{:?}", self);
+        bytes.as_bytes().to_vec()
+    }
 
-	pub fn set_err(mut self, err: String) -> ParserState {
-		self.is_err = true;
-		self.err_msg = Some(err);
+    pub fn set_err(mut self, err: String) -> ParserState {
+        self.is_err = true;
+        self.err_msg = Some(err);
 
-		self
-	}
+        self
+    }
 
-	pub fn update_state(mut self, offset: usize, res: Option<Box<dyn ParserResult>>) -> ParserState {
-		self.index += offset;
-		self.res = res;
+    pub fn update_state(
+        mut self,
+        offset: usize,
+        res: Option<Box<dyn ParserResult>>,
+    ) -> ParserState {
+        self.index += offset;
+        self.res = res;
 
-		self
-	}
+        self
+    }
 }
 
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
