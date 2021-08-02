@@ -9,9 +9,19 @@ README is subject to change.
 ### How to use
 
 ```Rust
-let str_parser = StringParser::new("Hello".to_string());
-let str2_parser = StringParser::new("World".to_string());
-let sqe_parser = SqeuenceOfParser::new(vec![str_parser, str2_parser]);
+let res = parse(
+	"Hello World".to_string(),
+	map(
+		sequence(
+			sequence(string("Hello".to_string()), spaces()),
+			string("World".to_string()),
+		),
+		|r| Ok((r.0 .0, r.0 .1, r.1)),
+	),
+);
 
-println!("{:#?}", sqe_parser.run("HelloWorld"));
+assert_eq!(
+	res.unwrap(),
+	("Hello".to_string(), " ".to_string(), "World".to_string())
+);
 ```
