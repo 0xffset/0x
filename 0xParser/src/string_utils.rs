@@ -8,28 +8,7 @@ pub trait StringUtils {
 
 impl StringUtils for String {
     fn substring(&self, start: usize, len: usize) -> String {
-        let mut char_pos = 0;
-        let mut byte_start = 0;
-        let mut it = self.chars();
-        loop {
-            if char_pos == start { break; }
-            if let Some(c) = it.next() {
-                char_pos += 1;
-                byte_start += c.len_utf8();
-            }
-            else { break; }
-        }
-        char_pos = 0;
-        let mut byte_end = byte_start;
-        loop {
-            if char_pos == len { break; }
-            if let Some(c) = it.next() {
-                char_pos += 1;
-                byte_end += c.len_utf8();
-            }
-            else { break; }
-        }
-        (&self[byte_start..byte_end]).to_string()
+        self.chars().skip(start).take(len).collect::<String>()
     }
 
     fn slice(&self, range: impl RangeBounds<usize>) -> String {
@@ -43,5 +22,23 @@ impl StringUtils for String {
             Bound::Unbounded => self.len(),
         } - start;
         self.substring(start, len)
+    }
+}
+
+#[cfg(test)]
+mod string_utils_tests {
+    use crate::string_utils::StringUtils;
+
+    #[test]
+    fn test_substring() {
+        let test_string = String::from("Hello There!");
+        assert_eq!(test_string.substring(0, 100), "Hello There!");
+        assert_eq!(test_string.substring(0, 2), "He");
+        assert_eq!(test_string.substring(1, 4), "ello");
+
+        let test_string = String::from("");
+        assert_eq!(test_string.substring(0, 100), "");
+        assert_eq!(test_string.substring(0, 2), "");
+        assert_eq!(test_string.substring(1, 4), "");
     }
 }
