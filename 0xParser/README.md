@@ -10,13 +10,10 @@ README is subject to change.
 
 ```Rust
 let res = parse(
-	"Hello World".to_string(),
+	"Hello World",
 	map(
-		sequence(
-			sequence(string("Hello".to_string()), spaces()),
-			string("World".to_string()),
-		),
-		|r| Ok((r.0 .0, r.0 .1, r.1)),
+		sequence!(string("Hello"), spaces(), string("World")),
+		|r| Ok((r.0, r.1 .0, r.1 .1)),
 	),
 );
 
