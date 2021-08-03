@@ -1,3 +1,5 @@
+mod macros;
+
 use std::str::FromStr;
 
 use crate::string_utils::StringUtils;
@@ -522,6 +524,22 @@ mod tests {
         assert_eq!(
             res.unwrap_err(),
             "Parser error, expected '\"Hallo\"' at position '0'".to_string()
+        );
+    }
+
+    #[test]
+    fn sequence_macro_test() {
+        let res = parse(
+            "Hello World".to_string(),
+            map(
+                sequence!(string("Hello".to_string()), spaces(), string("World".to_string())),
+                |r| Ok((r.0, r.1.0, r.1.1)),
+            ),
+        );
+    
+        assert_eq!(
+            res.unwrap(),
+            ("Hello".to_string(), " ".to_string(), "World".to_string())
         );
     }
 }
