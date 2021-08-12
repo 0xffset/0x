@@ -1,6 +1,6 @@
 mod macros;
 
-use std::str::FromStr;
+use std::{any::Any, str::FromStr};
 
 use crate::string_utils::StringUtils;
 use regex::Regex;
@@ -162,32 +162,12 @@ pub fn many<T: PT>(parser: Parser<T>) -> Parser<Vec<T>> {
     })
 }
 
-pub fn inbetween<T: PT, U: PT, B: PT>(
+pub fn between<T: PT, U: PT, B: PT>(
     front: Parser<T>,
     middle: Parser<U>,
     back: Parser<B>,
 ) -> Parser<U> {
-    Box::new(move |ctx: Context| {
-        let res_front = front(ctx.clone());
-        if res_front.is_err() {
-            let res_front = res_front.unwrap_err();
-            return Err(failure(res_front.ctx, res_front.exp));
-        }
-
-        let res_mid = middle(res_front.unwrap().ctx);
-        if res_mid.is_err() {
-            let res_mid = res_mid.unwrap_err();
-            return Err(failure(res_mid.ctx, res_mid.exp));
-        }
-
-        let res_back = back(res_mid.clone().unwrap().ctx);
-        if res_back.is_err() {
-            let res_back = res_back.unwrap_err();
-            return Err(failure(res_back.ctx, res_back.exp));
-        }
-
-        return Ok(success(res_back.unwrap().ctx, res_mid.unwrap().val));
-    })
+    return map(sequence!(front, middle, back), |res| Ok(res.1.0));
 }
 
 pub fn spaces() -> Parser<String> {
@@ -392,22 +372,22 @@ mod tests {
     }
 
     #[test]
-    fn inbetween_test() {
+    fn between_test() {
         let res = parse(
             "\"Hello\"",
-            inbetween(string("\""), string("Hello"), string("\"")),
+            between(string("\""), string("Hello"), string("\"")),
         );
         assert_eq!(res.unwrap(), "Hello");
 
         let res = parse(
             "1Hello\"",
-            inbetween(integer(), string("Hello"), string("\"")),
+            between(integer(), string("Hello"), string("\"")),
         );
         assert_eq!(res.unwrap(), "Hello");
 
         let res = parse(
             "\"Hello1",
-            inbetween(string("\""), string("Hello"), string("\"")),
+            between(string("\""), string("Hello"), string("\"")),
         );
         assert_eq!(res.unwrap_err(), "Parser error, expected '\"' at position '6'");
     }

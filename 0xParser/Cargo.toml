@@ -3,6 +3,11 @@ name = "parse"
 version = "0.1.0"
 edition = "2018"
 
+license = "MIT"
+description = "Parser combinator crate"
+repository = "https://github.com/0xffset/0x/tree/master/0xParser"
+readme = "README.md"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
