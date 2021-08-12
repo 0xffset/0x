@@ -7,6 +7,9 @@ use regex::Regex;
 
 pub mod string_utils;
 
+pub trait PT: std::fmt::Debug + Clone + 'static {}
+impl<T: std::fmt::Debug + Clone + 'static> PT for T {}
+
 pub type Parser<T> = Box<dyn Fn(Context) -> Result<Success<T>, Failure>>;
 
 #[derive(Debug, Clone)]
@@ -61,9 +64,10 @@ pub fn regex<A: AsRef<str>, B: AsRef<str>>(target: A, expected: B) -> Parser<Str
         let sliced_ctx = ctx.txt.slice(ctx.pos..);
         let mat = regex.find(&sliced_ctx);
         if mat.is_some() {
-            if mat.unwrap().start() == 0 {
-                ctx.pos += mat.unwrap().end();
-                return Ok(success(ctx, mat.unwrap().as_str().to_string()));
+            let mat = mat.unwrap();
+            if mat.start() == 0 {
+                ctx.pos += mat.end();
+                return Ok(success(ctx, mat.as_str().to_string()));
             }
         }
 
@@ -71,7 +75,7 @@ pub fn regex<A: AsRef<str>, B: AsRef<str>>(target: A, expected: B) -> Parser<Str
     })
 }
 
-pub fn optional<T: std::fmt::Debug + Clone + 'static>(parser: Parser<T>) -> Parser<Option<T>> {
+pub fn optional<T: PT>(parser: Parser<T>) -> Parser<Option<T>> {
     Box::new(move |ctx: Context| {
         let res = parser(ctx.clone());
 
@@ -79,32 +83,32 @@ pub fn optional<T: std::fmt::Debug + Clone + 'static>(parser: Parser<T>) -> Pars
             return Ok(success(res.unwrap_err().ctx, None));
         }
 
-        return Ok(success(res.clone().unwrap().ctx, Some(res.unwrap().val)));
+        let res = res.unwrap();
+        return Ok(success(res.ctx, Some(res.val)));
     })
 }
 
-pub fn sequence<T: std::fmt::Debug + Clone + 'static, U: std::fmt::Debug + Clone + 'static>(
-    a: Parser<T>,
-    b: Parser<U>,
-) -> Parser<(T, U)> {
+pub fn sequence<T: PT, U: PT>(a: Parser<T>, b: Parser<U>) -> Parser<(T, U)> {
     Box::new(move |mut ctx: Context| {
         let res_a = a(ctx.clone());
         if res_a.is_err() {
             return Err(res_a.unwrap_err());
         }
-        ctx = res_a.clone().unwrap().ctx;
+        let res_a = res_a.unwrap();
+        ctx = res_a.ctx;
 
         let res_b = b(ctx.clone());
         if res_b.is_err() {
             return Err(res_b.unwrap_err());
         }
-        ctx = res_b.clone().unwrap().ctx;
+        let res_b = res_b.unwrap();
+        ctx = res_b.ctx;
 
-        return Ok(success(ctx, (res_a.unwrap().val, res_b.unwrap().val)));
+        return Ok(success(ctx, (res_a.val, res_b.val)));
     })
 }
 
-pub fn any<T: std::fmt::Debug + Clone + 'static>(parsers: Vec<Parser<T>>) -> Parser<T> {
+pub fn any<T: PT>(parsers: Vec<Parser<T>>) -> Parser<T> {
     Box::new(move |ctx: Context| {
         for parser in parsers.iter() {
             let res = parser(ctx.clone());
@@ -117,18 +121,16 @@ pub fn any<T: std::fmt::Debug + Clone + 'static>(parsers: Vec<Parser<T>>) -> Par
     })
 }
 
-pub fn map<T: std::fmt::Debug + Clone + 'static, U: std::fmt::Debug + Clone + 'static>(
-    parser: Parser<T>,
-    mapper: fn(T) -> Result<U, String>,
-) -> Parser<U> {
+pub fn map<T: PT, U: PT>(parser: Parser<T>, mapper: fn(T) -> Result<U, String>) -> Parser<U> {
     Box::new(move |ctx: Context| {
         let res = parser(ctx.clone());
         if res.is_err() {
             return Err(res.unwrap_err());
         }
+        let res = res.unwrap();
 
-        let ctx = res.clone().unwrap().ctx.clone();
-        let new_res = mapper(res.unwrap().val);
+        let ctx = res.ctx;
+        let new_res = mapper(res.val);
         if new_res.is_ok() {
             return Ok(success(ctx, new_res.unwrap()));
         }
@@ -137,7 +139,7 @@ pub fn map<T: std::fmt::Debug + Clone + 'static, U: std::fmt::Debug + Clone + 's
     })
 }
 
-pub fn many<T: std::fmt::Debug + Clone + 'static>(parser: Parser<T>) -> Parser<Vec<T>> {
+pub fn many<T: PT>(parser: Parser<T>) -> Parser<Vec<T>> {
     Box::new(move |mut ctx: Context| {
         let mut ret: Vec<T> = Vec::new();
 
@@ -146,15 +148,45 @@ pub fn many<T: std::fmt::Debug + Clone + 'static>(parser: Parser<T>) -> Parser<V
 
             if res.is_err() {
                 if ret.len() == 0 {
-                    return Err(failure(res.clone().unwrap_err().ctx, res.unwrap_err().exp));
+                    let res = res.unwrap_err();
+                    return Err(failure(res.ctx, res.exp));
                 }
 
                 return Ok(success(ctx, ret));
             }
+            let res = res.unwrap();
 
-            ctx = res.clone().unwrap().ctx;
-            ret.push(res.unwrap().val);
+            ctx = res.ctx;
+            ret.push(res.val);
         }
+    })
+}
+
+pub fn inbetween<T: PT, U: PT, B: PT>(
+    front: Parser<T>,
+    middle: Parser<U>,
+    back: Parser<B>,
+) -> Parser<U> {
+    Box::new(move |ctx: Context| {
+        let res_front = front(ctx.clone());
+        if res_front.is_err() {
+            let res_front = res_front.unwrap_err();
+            return Err(failure(res_front.ctx, res_front.exp));
+        }
+
+        let res_mid = middle(res_front.unwrap().ctx);
+        if res_mid.is_err() {
+            let res_mid = res_mid.unwrap_err();
+            return Err(failure(res_mid.ctx, res_mid.exp));
+        }
+
+        let res_back = back(res_mid.clone().unwrap().ctx);
+        if res_back.is_err() {
+            let res_back = res_back.unwrap_err();
+            return Err(failure(res_back.ctx, res_back.exp));
+        }
+
+        return Ok(success(res_back.unwrap().ctx, res_mid.unwrap().val));
     })
 }
 
@@ -162,11 +194,15 @@ pub fn spaces() -> Parser<String> {
     return map(many(string(" ")), |s: Vec<String>| Ok(s.join("")));
 }
 
+fn letters() -> Parser<String> {
+    return regex("[a-zA-Z]+", "letters");
+}
+
 pub fn integer() -> Parser<String> {
     return regex(r"\d+", "integer");
 }
 
-pub fn parsed_integer<T: std::fmt::Debug + Clone + 'static + FromStr>() -> Parser<T> {
+pub fn parsed_integer<T: PT + FromStr>() -> Parser<T> {
     return map(regex(r"\d+", "integer"), |s: String| match s.parse::<T>() {
         Ok(val) => Ok(val),
         Err(_) => Err("parsable integer".to_string()),
@@ -177,7 +213,7 @@ pub fn float() -> Parser<String> {
     return regex(r"\d+\.\d*", "float");
 }
 
-pub fn parsed_float<T: std::fmt::Debug + Clone + 'static + FromStr>() -> Parser<T> {
+pub fn parsed_float<T: PT + FromStr>() -> Parser<T> {
     return map(regex(r"\d+\.\d*", "float"), |s: String| {
         match s.parse::<T>() {
             Ok(val) => Ok(val),
@@ -186,10 +222,7 @@ pub fn parsed_float<T: std::fmt::Debug + Clone + 'static + FromStr>() -> Parser<
     });
 }
 
-pub fn expect<T: std::fmt::Debug + Clone + 'static, S: AsRef<str>>(
-    parser: Parser<T>,
-    expected: S,
-) -> Parser<T> {
+pub fn expect<T: PT, S: AsRef<str>>(parser: Parser<T>, expected: S) -> Parser<T> {
     let expected = expected.as_ref().to_string();
 
     Box::new(move |ctx: Context| {
@@ -202,18 +235,15 @@ pub fn expect<T: std::fmt::Debug + Clone + 'static, S: AsRef<str>>(
     })
 }
 
-pub fn parse<S: AsRef<str>, T: std::fmt::Debug + Clone + 'static>(
-    txt: S,
-    parser: Parser<T>,
-) -> Result<T, String> {
+pub fn parse<S: AsRef<str>, T: PT>(txt: S, parser: Parser<T>) -> Result<T, String> {
     let txt = txt.as_ref().to_string();
 
     let res = parser(Context { txt, pos: 0 });
     if res.is_err() {
+        let res = res.unwrap_err();
         return Err(format!(
             "Parser error, expected '{}' at position '{}'",
-            res.clone().unwrap_err().exp,
-            res.unwrap_err().ctx.pos
+            res.exp, res.ctx.pos
         ));
     }
 
@@ -362,6 +392,27 @@ mod tests {
     }
 
     #[test]
+    fn inbetween_test() {
+        let res = parse(
+            "\"Hello\"",
+            inbetween(string("\""), string("Hello"), string("\"")),
+        );
+        assert_eq!(res.unwrap(), "Hello");
+
+        let res = parse(
+            "1Hello\"",
+            inbetween(integer(), string("Hello"), string("\"")),
+        );
+        assert_eq!(res.unwrap(), "Hello");
+
+        let res = parse(
+            "\"Hello1",
+            inbetween(string("\""), string("Hello"), string("\"")),
+        );
+        assert_eq!(res.unwrap_err(), "Parser error, expected '\"' at position '6'");
+    }
+
+    #[test]
     fn spaces_test() {
         let res = parse(
             "Hello World",
@@ -391,6 +442,21 @@ mod tests {
                 ("Hello".to_string(), "    ".to_string()),
                 "World".to_string()
             )
+        );
+    }
+
+    #[test]
+    fn letters_test() {
+        let res = parse("Hello", letters());
+        assert_eq!(res.unwrap(), "Hello");
+
+        let res = parse("Hello!", letters());
+        assert_eq!(res.unwrap(), "Hello");
+
+        let res = parse("1Hello", letters());
+        assert_eq!(
+            res.unwrap_err(),
+            "Parser error, expected 'letters' at position '0'"
         );
     }
 
