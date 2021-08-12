@@ -1,11 +1,13 @@
 mod macros;
 
-use std::{any::Any, str::FromStr};
+use std:: str::FromStr;
 
 use crate::string_utils::StringUtils;
 use regex::Regex;
 
 pub mod string_utils;
+
+#[allow(dead_code)]
 
 pub trait PT: std::fmt::Debug + Clone + 'static {}
 impl<T: std::fmt::Debug + Clone + 'static> PT for T {}
