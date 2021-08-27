@@ -2,9 +2,9 @@ use macros::reg;
 
 use crate::cpu::CPU;
 
-macro_rules! instr_helper {
-	($cpu:ident, $val1:ident, $f:ident, $val2:ident) => {
-        // calculate the result with given function $f, update $destination with result
+macro_rules! instr {
+    ($cpu:ident, $val1:ident, $f:ident, $val2:ident) => {
+        // calculate the result with given function $f, update accumulator with result
         // and update status register
         let res = $val1.$f($val2);
 
@@ -12,38 +12,40 @@ macro_rules! instr_helper {
 
         $cpu.update_sr($val1, res);
     };
-}
 
-macro_rules! instr {
     ($cpu:ident, wr, $f:ident) => {
+        // fetch word and register
         let val = $cpu.fetch_word();
 
         let r_addr = $cpu.fetch_word();
         let r_val = $cpu.get_reg(r_addr);
 
-		instr_helper!($cpu, val, $f, r_val);
+		instr!($cpu, val, $f, r_val);
     };
 
     ($cpu:ident, rr, $f:ident) => {
+        // fetch registers
         let r1_addr = $cpu.fetch_word();
         let r2_addr = $cpu.fetch_word();
 
         let r1_val = $cpu.get_reg(r1_addr);
         let r2_val = $cpu.get_reg(r2_addr);
 
-		instr_helper!($cpu, r1_val, $f, r2_val);
+		instr!($cpu, r1_val, $f, r2_val);
     };
 
     ($cpu:ident, rw, $f:ident) => {
+        // fetch register and word
         let r_addr = $cpu.fetch_word();
         let r_val = $cpu.get_reg(r_addr);
 
         let val = $cpu.fetch_word();
 
-		instr_helper!($cpu, r_val, $f, val);
+		instr!($cpu, r_val, $f, val);
     };
 
     ($cpu:ident, cc, $f:ident) => {
+        // increment or decrement register
         let r_addr = $cpu.fetch_word();
         let r_val = $cpu.get_reg(r_addr);
         let acc = r_val.$f(1);

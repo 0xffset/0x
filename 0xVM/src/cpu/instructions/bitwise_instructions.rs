@@ -45,6 +45,7 @@ macro_rules! instr_helper {
 }
 
 macro_rules! instr {
+    // use functions
     ($cpu:ident, rw, $f:ident) => {
         let (r_addr, r_val, value) = instr_helper!(rw, $cpu);
 
@@ -57,6 +58,7 @@ macro_rules! instr {
         instr_helper!($cpu, r1_val, $f, r2_val, r1_addr);
     };
 
+    // use operators
     ($cpu:ident, rw, $op:tt) => {
         let (r_addr, r_val, value) = instr_helper!(rw, $cpu);
 
