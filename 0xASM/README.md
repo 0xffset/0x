@@ -2,10 +2,6 @@
 
 Assembler for the 0xVM. 
 
-#### Info
-
-Subject to many changes with a much more advanced assembler language.
-
 ### How to run
 
 `cargo run <input_file> <output_file>`<br>
