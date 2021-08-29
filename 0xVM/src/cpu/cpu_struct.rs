@@ -22,24 +22,29 @@ pub struct CPU {
     registers: Memory,
     stackframe_size: Word,
     halt_signal: bool,
+
+    stack_set: bool,
 }
 
 #[allow(dead_code)]
 impl CPU {
     pub fn new(memory_mapper: MemoryMapper) -> Self {
-        let mut ret = CPU {
+        CPU {
             memory_mapper,
             registers: Memory::new((crate::REGISTER_COUNT * 4) as u32),
             stackframe_size: 0,
             halt_signal: false,
-        };
+
+            stack_set: false,
+        }
+    }
+
+    pub fn set_stack(&mut self, stack_addr: Word) {
+        self.stack_set = true;
 
         // -4 because 4 bytes to store a 32-Bit addr
-        // TODO: change this to not hard coded
-        ret.set_reg(reg!("sp"), 0xFFFF - 4);
-        ret.set_reg(reg!("fp"), 0xFFFF - 4);
-
-        ret
+        self.set_reg(reg!("sp"), stack_addr - 4);
+        self.set_reg(reg!("fp"), stack_addr - 4);
     }
 
     pub fn update_sr(&mut self, pre: Word, post: Word) {
@@ -274,6 +279,10 @@ impl CPU {
     }
 
     pub fn run_debug(&mut self, addr: Word, n: Word) {
+        if !self.stack_set {
+            panic!("[VM] Stack not set");
+        }
+
         use std::io;
 
         while !self.halt_signal {
@@ -286,6 +295,10 @@ impl CPU {
     }
 
     pub fn run(&mut self) {
+        if !self.stack_set {
+            panic!("[VM] Stack not set");
+        }
+
         while !self.halt_signal {
             self.step();
         }

@@ -1,4 +1,5 @@
 #![feature(panic_info_message)]
+#![feature(type_name_of_val)]
 
 use macros::init_registers;
 
@@ -34,9 +35,9 @@ fn main() {
     // custom panic outputs
     panic::set_hook(Box::new(|panic_info| {
         if let Some(s) = panic_info.message() {
-            println!("0xVM panicked at\n{}", s);
+            println!("0xVM panicked:\n{}", s);
         } else if let Some(s) = panic_info.payload().downcast_ref::<&str>() {
-            println!("0xVM panicked at\n{}", s);
+            println!("0xVM panicked:\n{}", s);
         } else {
             println!("0xVM panicked!");
         }
@@ -59,12 +60,11 @@ fn main() {
     let screen = Screen::new(16, 16);
 
     let mut mm = MemoryMapper::new();
-    mm.map(Box::new(memory), 0, 0xFFFF, true);
-    mm.map(Box::new(screen), 0x3000, 0x30FF, true);
+    mm.map(Box::new(screen), 0, 0x400);
+    mm.map(Box::new(memory), 0x400, 0xFFFF);
 
     let mut cpu = CPU::new(mm);
+    cpu.set_stack(0xFFFF);
 
     cpu.run();
-    // debug
-    // cpu.run_debug(0xFFFF - 70, 70);
 }

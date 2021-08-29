@@ -10,7 +10,6 @@ pub struct Region {
     pub device: Box<dyn Device>,
     pub start: Word,
     pub end: Word,
-    pub remap: bool,
 }
 
 #[allow(dead_code)]
@@ -27,16 +26,13 @@ impl MemoryMapper {
                 return i;
             }
         }
+
         panic!("[MEMORY MAPPER] No such region: '0x{:08X}'", addr);
     }
 
     fn get_region_and_addr(&self, addr: Word) -> (usize, Word) {
         let region_index = self.find_region(addr);
-        let final_addr = if self.regions[region_index].remap {
-            addr - self.regions[region_index].start
-        } else {
-            addr
-        };
+        let final_addr = addr - self.regions[region_index].start;
 
         (region_index, final_addr)
     }
@@ -69,27 +65,9 @@ impl MemoryMapper {
             .set_byte(final_addr, value);
     }
 
-    pub fn map(&mut self, device: Box<dyn Device>, start: Word, end: Word, remap: bool)
-    // -> Box<dyn Fn(&mut MemoryMapper)> {
-    {
-        let region = Region {
-            device,
-            start,
-            end,
-            remap,
-        };
+    pub fn map(&mut self, device: Box<dyn Device>, start: Word, end: Word) {
+        let region = Region { device, start, end };
 
         self.regions.insert(0, region);
-
-        /*
-        Box::new(move |this: &mut MemoryMapper| {
-            for (i, r) in this.regions.iter().enumerate() {
-                if *r == region {
-                    this.regions.remove(i);
-                    break;
-                }
-            }
-        })
-        */
     }
 }
