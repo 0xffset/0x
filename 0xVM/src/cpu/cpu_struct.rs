@@ -23,6 +23,8 @@ pub struct CPU {
     stackframe_size: Word,
     halt_signal: bool,
 
+    stack_start: Word,
+    stack_size: Word,
     stack_set: bool,
 }
 
@@ -35,16 +37,21 @@ impl CPU {
             stackframe_size: 0,
             halt_signal: false,
 
+            stack_start: 0,
+            stack_size: 0,
             stack_set: false,
         }
     }
 
-    pub fn set_stack(&mut self, stack_addr: Word) {
-        self.stack_set = true;
-
+    pub fn set_stack(&mut self, stack_addr: Word, stack_size: Word) {
+        self.stack_start = stack_addr;
+        self.stack_size = stack_size;
+        
         // -4 because 4 bytes to store a 32-Bit addr
         self.set_reg(reg!("sp"), stack_addr - 4);
         self.set_reg(reg!("fp"), stack_addr - 4);
+        
+        self.stack_set = true;
     }
 
     pub fn update_sr(&mut self, pre: Word, post: Word) {
@@ -106,6 +113,11 @@ impl CPU {
     /// Pushes onto stack and increments stackframe size
     pub fn push(&mut self, val: Word) {
         let sp_addr = self.get_reg(reg!("sp"));
+
+        if sp_addr - 4 < self.stack_start - self.stack_size {
+            panic!("[CPU] Stack overflow");
+        }
+
         self.memory_mapper.set_word(sp_addr, val);
         self.set_reg(reg!("sp"), sp_addr - 4);
 
@@ -115,6 +127,11 @@ impl CPU {
     /// Pops from the stack and decrements stackframe size
     pub fn pop(&mut self) -> Word {
         let next_sp_addr = self.get_reg(reg!("sp")) + 4;
+
+        if next_sp_addr > self.stack_start - 3 {
+            panic!("[CPU] Stack underflow");
+        }
+
         self.set_reg(reg!("sp"), next_sp_addr);
 
         self.stackframe_size -= 4;

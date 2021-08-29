@@ -64,7 +64,7 @@ fn main() {
     mm.map(Box::new(memory), 0x400, 0xFFFF);
 
     let mut cpu = CPU::new(mm);
-    cpu.set_stack(0xFFFF);
+    cpu.set_stack(0xFFFF, 1024);
 
     cpu.run();
 }
