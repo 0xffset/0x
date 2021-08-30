@@ -29,9 +29,10 @@ pub struct CPU {
     stack_size: Word,
     stack_set: bool,
 
-    debug_memory_pos: Word,
-    debug_register_cache: [Word; crate::REGISTER_COUNT],
-    debug_memory_cache: [Byte; 16 * 4],
+    _debug_memory_pos: Word,
+    _debug_skip_step: bool,
+    _debug_register_cache: [Word; crate::REGISTER_COUNT],
+    _debug_memory_cache: [Byte; 16 * 4],
 }
 
 #[allow(dead_code)]
@@ -47,9 +48,10 @@ impl CPU {
             stack_size: 0,
             stack_set: false,
 
-            debug_memory_pos: 0,
-            debug_register_cache: [0; crate::REGISTER_COUNT],
-            debug_memory_cache: [0; 16 * 4],
+            _debug_memory_pos: 0,
+            _debug_skip_step: false,
+            _debug_register_cache: [0; crate::REGISTER_COUNT],
+            _debug_memory_cache: [0; 16 * 4],
         };
 
         cpu.set_reg(reg!("pc"), pc);
@@ -308,7 +310,7 @@ impl CPU {
             );
 
             let reg_val = self.get_reg(*addr);
-            if reg_val != self.debug_register_cache[i] && show_changes {
+            if reg_val != self._debug_register_cache[i] && show_changes {
                 // if the register value has changed, add red background
                 output.push_str(Self::red_background(format!("0x{:08X}", reg_val)).as_str());
             } else {
@@ -317,7 +319,7 @@ impl CPU {
             }
 
             // update the cache
-            self.debug_register_cache[i] = reg_val;
+            self._debug_register_cache[i] = reg_val;
         }
 
         self.debug_print(stdout, output);
@@ -326,8 +328,8 @@ impl CPU {
     /// Prints a view of a region of the memory to the console
     fn view_memory_at(&mut self, stdout: &mut Stdout, offset: Word, show_changes: bool) {
         let mut mem_snapshot: Vec<Byte> = Vec::new();
-        let max_addr = self.debug_memory_pos + 16 * 4;
-        for i in self.debug_memory_pos..max_addr {
+        let max_addr = self._debug_memory_pos + 16 * 4;
+        for i in self._debug_memory_pos..max_addr {
             mem_snapshot.push(self.memory_mapper.get_byte(i));
         }
 
@@ -340,7 +342,7 @@ impl CPU {
                     "\x1b[{};{}H0x{:08X}:",
                     crate::REGISTER_COUNT as Word + 2 + i as Word,
                     offset + 3,
-                    self.debug_memory_pos as usize + i * 4
+                    self._debug_memory_pos as usize + i * 4
                 )
                 .as_str(),
             );
@@ -348,7 +350,7 @@ impl CPU {
             for j in 0..4 {
                 let temp_offset = i * 4 + j;
                 let byte = mem_snapshot[temp_offset];
-                if byte != self.debug_memory_cache[temp_offset] && show_changes {
+                if byte != self._debug_memory_cache[temp_offset] && show_changes {
                     // if the byte value has changed, add red background
                     output.push_str(Self::red_background(format!(" {:02X}", byte)).as_str());
                 } else {
@@ -357,7 +359,7 @@ impl CPU {
                 }
 
                 // update the cache
-                self.debug_memory_cache[temp_offset] = byte;
+                self._debug_memory_cache[temp_offset] = byte;
             }
         }
         self.debug_print(stdout, output);
@@ -380,10 +382,10 @@ impl CPU {
 
         // setup cache
         for (i, (_, v)) in crate::REGISTERS.iter().enumerate() {
-            self.debug_register_cache[i] = *v;
+            self._debug_register_cache[i] = *v;
         }
         for i in 0..16 * 4 {
-            self.debug_memory_cache[i] = self.memory_mapper.get_byte(i as Word);
+            self._debug_memory_cache[i] = self.memory_mapper.get_byte(i as Word);
         }
 
         // cache stdout instance
@@ -400,28 +402,28 @@ impl CPU {
         self.view_memory_at(&mut stdout, offset, false);
 
         while !self.halt_signal {
+            self._debug_skip_step = false;
             let mut input = String::new();
             std::io::stdin().read_line(&mut input).unwrap();
 
             // input number to jump to that memory location
             match Word::from_str_radix(input.trim(), 16) {
                 Ok(n) => {
-                    self.debug_memory_pos = n;
-                    self.debug_registers(&mut stdout, offset, true);
-                    self.view_memory_at(&mut stdout, offset, true);
+                    self._debug_memory_pos = n;
+                    self.debug_registers(&mut stdout, offset, false);
+                    self.view_memory_at(&mut stdout, offset, false);
 
-                    // another pause
-                    std::thread::sleep(std::time::Duration::from_millis(500));
-                    std::io::stdin().read_line(&mut String::new()).unwrap();
+                    self._debug_skip_step = true;
                 }
-                Err(_) => {
-                    self.debug_registers(&mut stdout, offset, true);
-                    self.view_memory_at(&mut stdout, offset, true);
-                }
+                Err(_) => {}
             }
 
+            if !self._debug_skip_step {
+                self.step();
+                self.debug_registers(&mut stdout, offset, true);
+                self.view_memory_at(&mut stdout, offset, true);
+            }
             std::thread::sleep(std::time::Duration::from_millis(500));
-            self.step();
         }
     }
 
