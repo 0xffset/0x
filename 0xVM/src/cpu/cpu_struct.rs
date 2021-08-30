@@ -1,3 +1,5 @@
+use std::io::{Stdout, Write};
+
 use crate::{
     device::Device,
     memory::{Byte, Memory, MemoryMapper, Word},
@@ -26,12 +28,16 @@ pub struct CPU {
     stack_start: Word,
     stack_size: Word,
     stack_set: bool,
+
+    debug_memory_pos: Word,
+    debug_register_cache: [Word; crate::REGISTER_COUNT],
+    debug_memory_cache: [Byte; 16 * 4],
 }
 
 #[allow(dead_code)]
 impl CPU {
-    pub fn new(memory_mapper: MemoryMapper) -> Self {
-        CPU {
+    pub fn new(memory_mapper: MemoryMapper, pc: Word) -> Self {
+        let mut cpu = CPU {
             memory_mapper,
             registers: Memory::new((crate::REGISTER_COUNT * 4) as u32),
             stackframe_size: 0,
@@ -40,17 +46,25 @@ impl CPU {
             stack_start: 0,
             stack_size: 0,
             stack_set: false,
-        }
+
+            debug_memory_pos: 0,
+            debug_register_cache: [0; crate::REGISTER_COUNT],
+            debug_memory_cache: [0; 16 * 4],
+        };
+
+        cpu.set_reg(reg!("pc"), pc);
+
+        cpu
     }
 
     pub fn set_stack(&mut self, stack_addr: Word, stack_size: Word) {
         self.stack_start = stack_addr;
         self.stack_size = stack_size;
-        
+
         // -4 because 4 bytes to store a 32-Bit addr
         self.set_reg(reg!("sp"), stack_addr - 4);
         self.set_reg(reg!("fp"), stack_addr - 4);
-        
+
         self.stack_set = true;
     }
 
@@ -261,32 +275,92 @@ impl CPU {
         );
     }
 
+    /// Prints debug output with offset
+    fn debug_print(&self, stdout: &mut Stdout, output: String) {
+        // move curser next to the screen device output,
+        // print output and flush the output buffer
+        stdout
+            .write(format!("{}\x1b[0K", output).as_bytes())
+            .expect("[VM] Debugger display error");
+
+        stdout.flush().expect("[VM] Error flushing stdout");
+    }
+
+    // adds ansi code for red background around the parameter
+    #[inline(always)]
+    fn red_background(s: String) -> String {
+        format!("\x1b[41m{}\x1b[0m", s)
+    }
+
     /// Prints a view of all registers to the console
-    pub fn debug(&self) {
-        for (name, addr) in crate::REGISTERS {
-            println!("{:<4}: 0x{:08X}", name, self.get_reg(*addr));
+    fn debug_registers(&mut self, stdout: &mut Stdout, offset: Word, show_changes: bool) {
+        let mut output = String::new();
+        for (i, (name, addr)) in crate::REGISTERS.iter().enumerate() {
+            // move cursor and print register name
+            output.push_str(
+                format!(
+                    "\x1b[{};{}H{:<4} ",
+                    i as Word + 1,
+                    offset + 3,
+                    format!("{}:", name)
+                )
+                .as_str(),
+            );
+
+            let reg_val = self.get_reg(*addr);
+            if reg_val != self.debug_register_cache[i] && show_changes {
+                // if the register value has changed, add red background
+                output.push_str(Self::red_background(format!("0x{:08X}", reg_val)).as_str());
+            } else {
+                // otherwise just print the value
+                output.push_str(format!("0x{:08X}", reg_val).as_str());
+            }
+
+            // update the cache
+            self.debug_register_cache[i] = reg_val;
         }
-        println!();
+
+        self.debug_print(stdout, output);
     }
 
     /// Prints a view of a region of the memory to the console
-    fn view_memory_at(&self, addr: Word, n: Word) {
+    fn view_memory_at(&mut self, stdout: &mut Stdout, offset: Word, show_changes: bool) {
         let mut mem_snapshot: Vec<Byte> = Vec::new();
-        // TODO
-
-        let max_addr = addr + n;
-
-        for i in addr..max_addr {
+        let max_addr = self.debug_memory_pos + 16 * 4;
+        for i in self.debug_memory_pos..max_addr {
             mem_snapshot.push(self.memory_mapper.get_byte(i));
         }
 
-        for (offset, byte) in mem_snapshot.iter().enumerate() {
-            if offset % 16 == 0 {
-                print!("\n0x{:08X}:", addr as usize + offset);
+        let mut output = String::new();
+        for i in 0..16 {
+            // move curser next to the screen device output
+            // and print memory address and value
+            output.push_str(
+                format!(
+                    "\x1b[{};{}H0x{:08X}:",
+                    crate::REGISTER_COUNT as Word + 2 + i as Word,
+                    offset + 3,
+                    self.debug_memory_pos as usize + i * 4
+                )
+                .as_str(),
+            );
+
+            for j in 0..4 {
+                let temp_offset = i * 4 + j;
+                let byte = mem_snapshot[temp_offset];
+                if byte != self.debug_memory_cache[temp_offset] && show_changes {
+                    // if the byte value has changed, add red background
+                    output.push_str(Self::red_background(format!(" {:02X}", byte)).as_str());
+                } else {
+                    // otherwise just print the value
+                    output.push_str(format!(" {:02X}", byte).as_str());
+                }
+
+                // update the cache
+                self.debug_memory_cache[temp_offset] = byte;
             }
-            print!(" 0x{:02X}", byte);
         }
-        println!();
+        self.debug_print(stdout, output);
     }
 
     /// Progresses the program
@@ -295,19 +369,59 @@ impl CPU {
         self.execute(instr);
     }
 
-    pub fn run_debug(&mut self, addr: Word, n: Word) {
+    pub fn run_debug(&mut self, mut offset: Word) {
         if !self.stack_set {
             panic!("[VM] Stack not set");
         }
 
-        use std::io;
+        // adjust that each char is printed with a space between
+        // to make it look better in the console
+        offset *= 2;
+
+        // setup cache
+        for (i, (_, v)) in crate::REGISTERS.iter().enumerate() {
+            self.debug_register_cache[i] = *v;
+        }
+        for i in 0..16 * 4 {
+            self.debug_memory_cache[i] = self.memory_mapper.get_byte(i as Word);
+        }
+
+        // cache stdout instance
+        let mut stdout = std::io::stdout();
+
+        // clear screen before starting
+        stdout
+            .write(format!("\x1b[2J").as_bytes())
+            .expect("[VM] Debugger display error");
+        stdout.flush().expect("[VM] Error flushing stdout");
+
+        // inital display
+        self.debug_registers(&mut stdout, offset, false);
+        self.view_memory_at(&mut stdout, offset, false);
 
         while !self.halt_signal {
-            self.step();
-            self.debug();
-            self.view_memory_at(addr, n);
+            let mut input = String::new();
+            std::io::stdin().read_line(&mut input).unwrap();
 
-            io::stdin().read_line(&mut String::new()).unwrap();
+            // input number to jump to that memory location
+            match Word::from_str_radix(input.trim(), 16) {
+                Ok(n) => {
+                    self.debug_memory_pos = n;
+                    self.debug_registers(&mut stdout, offset, true);
+                    self.view_memory_at(&mut stdout, offset, true);
+
+                    // another pause
+                    std::thread::sleep(std::time::Duration::from_millis(500));
+                    std::io::stdin().read_line(&mut String::new()).unwrap();
+                }
+                Err(_) => {
+                    self.debug_registers(&mut stdout, offset, true);
+                    self.view_memory_at(&mut stdout, offset, true);
+                }
+            }
+
+            std::thread::sleep(std::time::Duration::from_millis(500));
+            self.step();
         }
     }
 

@@ -25,9 +25,9 @@ use crate::{device::Screen, memory::MemoryMapper};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    if args.len() != 2 {
+    if args.len() < 2 {
         panic!(
-            "[VM] Usage: {0} <program_path>\nExample: {0} a.bin",
+            "[VM] Usage: {0} <program_path> [-debug]\nExample: {0} a.bin",
             args.get(0).unwrap()
         );
     }
@@ -63,8 +63,12 @@ fn main() {
     mm.map(Box::new(screen), 0, 0x400);
     mm.map(Box::new(memory), 0x400, 0xFFFF);
 
-    let mut cpu = CPU::new(mm);
+    let mut cpu = CPU::new(mm, 0x400);
     cpu.set_stack(0xFFFF, 1024);
 
-    cpu.run();
+    if args.len() > 2 && args.get(2).unwrap() == "-debug" {
+        cpu.run_debug(16);
+    } else {
+        cpu.run();
+    }
 }
