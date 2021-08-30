@@ -30,7 +30,6 @@ pub struct CPU {
     stack_set: bool,
 
     _debug_memory_pos: Word,
-    _debug_skip_step: bool,
     _debug_register_cache: [Word; crate::REGISTER_COUNT],
     _debug_memory_cache: [Byte; 16 * 4],
 }
@@ -49,7 +48,6 @@ impl CPU {
             stack_set: false,
 
             _debug_memory_pos: 0,
-            _debug_skip_step: false,
             _debug_register_cache: [0; crate::REGISTER_COUNT],
             _debug_memory_cache: [0; 16 * 4],
         };
@@ -402,7 +400,6 @@ impl CPU {
         self.view_memory_at(&mut stdout, offset, false);
 
         while !self.halt_signal {
-            self._debug_skip_step = false;
             let mut input = String::new();
             std::io::stdin().read_line(&mut input).unwrap();
 
@@ -412,16 +409,12 @@ impl CPU {
                     self._debug_memory_pos = n;
                     self.debug_registers(&mut stdout, offset, false);
                     self.view_memory_at(&mut stdout, offset, false);
-
-                    self._debug_skip_step = true;
                 }
-                Err(_) => {}
-            }
-
-            if !self._debug_skip_step {
-                self.step();
-                self.debug_registers(&mut stdout, offset, true);
-                self.view_memory_at(&mut stdout, offset, true);
+                Err(_) => {
+                    self.step();
+                    self.debug_registers(&mut stdout, offset, true);
+                    self.view_memory_at(&mut stdout, offset, true);
+                }
             }
             std::thread::sleep(std::time::Duration::from_millis(500));
         }
