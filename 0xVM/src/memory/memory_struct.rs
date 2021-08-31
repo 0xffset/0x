@@ -76,6 +76,13 @@ impl Device for Memory {
         Word::from_le_bytes(data)
     }
 
+    fn get_range(&self, addr: Word, size: Word) -> Vec<Byte> {
+        self.data
+            .get(addr as usize..addr as usize + size as usize)
+            .expect(format!("[MEMORY] get_range: No such addr range '0x{:08X}-{:08X}'", addr, addr + size).as_str())
+            .to_vec()
+    }
+
     fn set_byte(&mut self, addr: Word, byte: Byte) {
         if self.data.len() < addr as usize {
             panic!("[MEMORY] set_byte: No such addr '0x{:08X}'", addr);
@@ -90,6 +97,16 @@ impl Device for Memory {
         }
 
         for (i, byte) in word.to_le_bytes().iter().enumerate() {
+            self.data[addr as usize + i] = *byte;
+        }
+    }
+
+    fn set_range(&mut self, addr: Word, data: Vec<Byte>) {
+        if addr as usize + data.len() > self.data.len() {
+            panic!("[MEMORY] set_range: No such addr range '0x{:08X}-{:08X}'", addr, addr + data.len() as Word);
+        }
+
+        for (i, byte) in data.iter().enumerate() {
             self.data[addr as usize + i] = *byte;
         }
     }

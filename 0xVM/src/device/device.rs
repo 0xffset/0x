@@ -14,4 +14,11 @@ pub trait Device {
     fn set_byte(&mut self, _: Word, _: Byte) -> () {
         panic!("[DEVICE] Device '{}' didn't implement 'set_byte()'", std::any::type_name_of_val(self));
     }
+
+    fn get_range(&self, _: Word, _: Word) -> Vec<Byte> {
+        panic!("[DEVICE] Device '{}' didn't implement 'get_range()'", std::any::type_name_of_val(self));
+    }
+    fn set_range(&mut self, _: Word, _: Vec<Byte>) -> () {
+        panic!("[DEVICE] Device '{}' didn't implement 'set_range()'", std::any::type_name_of_val(self));
+    }
 }

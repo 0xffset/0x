@@ -49,6 +49,14 @@ impl MemoryMapper {
         self.regions[region_index].device.get_byte(final_addr)
     }
 
+    pub fn get_range(&self, addr: Word, size: Word) -> Vec<Byte> {
+        let (region_index, final_addr) = self.get_region_and_addr(addr);
+
+        self.regions[region_index]
+            .device
+            .get_range(final_addr, size)
+    }
+
     pub fn set_word(&mut self, addr: Word, value: Word) {
         let (region_index, final_addr) = self.get_region_and_addr(addr);
 
@@ -63,6 +71,14 @@ impl MemoryMapper {
         self.regions[region_index]
             .device
             .set_byte(final_addr, value);
+    }
+
+    pub fn set_range(&mut self, addr: Word, values: Vec<Byte>) {
+        let (region_index, final_addr) = self.get_region_and_addr(addr);
+
+        self.regions[region_index]
+            .device
+            .set_range(final_addr, values);
     }
 
     pub fn map(&mut self, device: Box<dyn Device>, start: Word, end: Word) {

@@ -83,14 +83,7 @@ impl CPU {
         }
     }
 
-    /// Gets status flag at n
-    ///
-    /// # Example:
-    ///
-    /// ```
-    /// get_status_flag(1);
-    /// // returns `true` if bit 1 is set
-    /// ```
+    /// Gets status flag of the n-th bit
     #[inline]
     pub fn get_status_flag(&self, n: Byte) -> bool {
         self.get_reg(reg!("sr")) & (1u32.wrapping_shl(n as Word)) != 0
@@ -206,7 +199,13 @@ impl CPU {
                 (0x18, MOVROR),
                 (0x05, POP),
                 (0x15, PUSH),
-                (0x16, PUSHR)
+                (0x16, PUSHR),
+                (0x19, LOAD),
+                (0x1A, LOADR),
+                (0x1B, LOADM),
+                (0x1C, STORE),
+                (0x1D, STORER),
+                (0x1E, STOREM)
             ],
             // sub routine instructions
             [(0x01, JMP), (0x02, CALL), (0x03, CALLR), (0x04, RET)],

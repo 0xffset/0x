@@ -21,7 +21,7 @@ use memory::{Byte, Memory};
 mod cpu;
 use cpu::CPU;
 
-use crate::{device::Screen, memory::MemoryMapper};
+use crate::{device::{HardDrive, Screen}, memory::MemoryMapper};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -58,12 +58,14 @@ fn main() {
     
     let memory = Memory::from(buff, 0xFFFF);
     let screen = Screen::new(16, 16);
+    let hard_drive = HardDrive::new(8, 128);
 
     let mut mm = MemoryMapper::new();
     mm.map(Box::new(screen), 0, 0x400);
-    mm.map(Box::new(memory), 0x400, 0xFFFF);
+    mm.map(Box::new(hard_drive), 0x400, 0x408);
+    mm.map(Box::new(memory), 0x408, 0xFFFF + 0x408);
 
-    let mut cpu = CPU::new(mm, 0x400);
+    let mut cpu = CPU::new(mm, 0x408);
     cpu.set_stack(0xFFFF, 1024);
 
     if args.len() > 2 && args.get(2).unwrap() == "-debug" {

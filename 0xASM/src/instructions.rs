@@ -14,6 +14,12 @@ pub mod instruction_codes {
     pub const MOVMR: (Byte, usize) = (0x14, 2);
     pub const MOVRPR: (Byte, usize) = (0x17, 2);
     pub const MOVROR: (Byte, usize) = (0x18, 3);
+    pub const LOAD: (Byte, usize) = (0x19, 3);
+    pub const LOADR: (Byte, usize) = (0x1A, 3);
+    pub const LOADM: (Byte, usize) = (0x1B, 3);
+    pub const STORE: (Byte, usize) = (0x1C, 3);
+    pub const STORER: (Byte, usize) = (0x1D, 3);
+    pub const STOREM: (Byte, usize) = (0x1E, 3);
 
     // Stack
     pub const POP: (Byte, usize) = (0x05, 1);
@@ -100,6 +106,12 @@ pub fn instruction_to_byte(i: &str) -> Option<(Byte, usize)> {
         "MOVMR" => Some(MOVMR),
         "MOVRPR" => Some(MOVRPR),
         "MOVROR" => Some(MOVROR),
+        "LOAD" => Some(LOAD),
+        "LOADR" => Some(LOADR),
+        "LOADM" => Some(LOADM),
+        "STORE" => Some(STORE),
+        "STORER" => Some(STORER),
+        "STOREM" => Some(STOREM),
 
         "POP" => Some(POP),
         "PUSH" => Some(PUSH),
