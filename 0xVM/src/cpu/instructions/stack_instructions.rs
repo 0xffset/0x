@@ -1,10 +1,10 @@
-use crate::cpu::CPU;
+use crate::cpu::VM;
 
 /// ## POP r1
 /// Pop val from stack into register r1
 #[inline]
 #[allow(non_snake_case)]
-pub fn POP(cpu: &mut CPU) {
+pub fn POP(cpu: &mut VM) {
     let r_addr = cpu.fetch_word();
     let val = cpu.pop();
     cpu.set_reg(r_addr, val);
@@ -14,7 +14,7 @@ pub fn POP(cpu: &mut CPU) {
 /// Push 0x1234 onto the stack
 #[inline]
 #[allow(non_snake_case)]
-pub fn PUSH(cpu: &mut CPU) {
+pub fn PUSH(cpu: &mut VM) {
     let val = cpu.fetch_word();
 
     cpu.push(val);
@@ -24,7 +24,7 @@ pub fn PUSH(cpu: &mut CPU) {
 /// Push register r1 onto stack
 #[inline]
 #[allow(non_snake_case)]
-pub fn PUSHR(cpu: &mut CPU) {
+pub fn PUSHR(cpu: &mut VM) {
 	let r_addr = cpu.fetch_word();
 	let val = cpu.get_reg(r_addr);
 

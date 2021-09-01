@@ -1,7 +1,11 @@
-use std::io::{Stdout, Write};
+use std::{
+    fs::{self, File},
+    io::{Read, Stdout, Write},
+};
 
+use super::Config;
 use crate::{
-    device::Device,
+    device::{Device, HardDrive, Screen},
     memory::{Byte, Memory, MemoryMapper, Word},
 };
 use macros::reg;
@@ -19,53 +23,135 @@ macro_rules! generate_execute {
     };
 }
 
-pub struct CPU {
+#[derive(Debug)]
+struct DeviceOffsets {
+    pub screen: Word,
+    pub hard_drive: Word,
+    pub ram: Word,
+}
+
+pub struct VM {
     pub memory_mapper: MemoryMapper,
+    device_offsets: DeviceOffsets,
     registers: Memory,
-    stackframe_size: Word,
+
+    cfg: Config,
+
     halt_signal: bool,
 
-    stack_start: Word,
     stack_size: Word,
-    stack_set: bool,
+    stack_start: Word,
+    stackframe_size: Word,
 
+    _debug_mode: bool,
+    _debug_print_offset: Word,
     _debug_memory_pos: Word,
     _debug_register_cache: [Word; crate::REGISTER_COUNT],
     _debug_memory_cache: [Byte; 16 * 4],
 }
 
 #[allow(dead_code)]
-impl CPU {
-    pub fn new(memory_mapper: MemoryMapper, pc: Word) -> Self {
-        let mut cpu = CPU {
+impl VM {
+    pub fn new(cfg: Config) -> Self {
+        let mut _debug_print_offset = 0;
+
+        // create memory mapper
+        let mut pc_offset = 0;
+        let mut memory_mapper = MemoryMapper::new();
+
+        // keep track of the device offsets internally
+        let mut device_offsets = DeviceOffsets {
+            screen: 0,
+            hard_drive: 0,
+            ram: 0,
+        };
+
+        // ##########
+        // # Screen #
+        // ##########
+        if cfg.enable_screen {
+            device_offsets.screen = pc_offset;
+
+            let screen = Screen::new(cfg.screen_cfg);
+
+            _debug_print_offset = cfg.screen_cfg.width as Word;
+
+            // map screen into memory
+            memory_mapper.map(Box::new(screen), 0, cfg.screen_cfg.size);
+            pc_offset = cfg.screen_cfg.size;
+        }
+
+        // ##############
+        // # Hard drive #
+        // ##############
+        if cfg.enable_hd {
+            device_offsets.hard_drive = pc_offset;
+
+            let hd: HardDrive;
+            if cfg.load_hd {
+                // open hard drive file and load it into ram
+                let mut bin =
+                    File::open(cfg.hd_file.clone()).expect("[VM] Failed to open hard drive file");
+
+                // write config into buffer to be coppied into hard drive
+                let mut buff = Vec::<Byte>::new();
+                bin.read_to_end(&mut buff).unwrap();
+
+                hd = HardDrive::from(buff, cfg.hd_cfg);
+            } else {
+                hd = HardDrive::new(cfg.hd_cfg);
+            }
+
+            // map hard drive into memory
+            memory_mapper.map(Box::new(hd), pc_offset, pc_offset + 4);
+            pc_offset += 4;
+        }
+
+        // #######
+        // # RAM #
+        // #######
+        device_offsets.ram = pc_offset;
+        // open program file and load it into ram
+        let mut bin = File::open(cfg.program_file.clone())
+            .expect(format!("[VM] Failed to open program file '{}'", cfg.program_file).as_str());
+
+        // write config into buffer to be coppied into memory
+        let mut buff = Vec::<Byte>::new();
+        bin.read_to_end(&mut buff).unwrap();
+        let ram = Memory::from(buff, cfg.ram_size);
+
+        // map ram into memory
+        memory_mapper.map(Box::new(ram), pc_offset, pc_offset + cfg.ram_size);
+
+        // create VM object
+        let mut vm = VM {
             memory_mapper,
+            device_offsets,
             registers: Memory::new((crate::REGISTER_COUNT * 4) as u32),
-            stackframe_size: 0,
+
+            cfg: cfg.clone(),
+
             halt_signal: false,
 
-            stack_start: 0,
-            stack_size: 0,
-            stack_set: false,
+            stack_size: cfg.stack_size,
+            stack_start: pc_offset + cfg.ram_size,
+            stackframe_size: 0,
 
+            _debug_mode: cfg.debug_mode,
+            _debug_print_offset,
             _debug_memory_pos: 0,
             _debug_register_cache: [0; crate::REGISTER_COUNT],
             _debug_memory_cache: [0; 16 * 4],
         };
 
-        cpu.set_reg(reg!("pc"), pc);
-
-        cpu
-    }
-
-    pub fn set_stack(&mut self, stack_addr: Word, stack_size: Word) {
-        self.stack_start = stack_addr;
-        self.stack_size = stack_size;
-
+        // set stack pointers and program counter
         // -4 because 4 bytes to store a 32-Bit addr
-        self.set_reg(reg!("sp"), stack_addr - 4);
-        self.set_reg(reg!("fp"), stack_addr - 4);
+        vm.set_reg(reg!("sp"), vm.stack_start - 4);
+        vm.set_reg(reg!("fp"), vm.stack_start - 4);
 
-        self.stack_set = true;
+        vm.set_reg(reg!("pc"), pc_offset);
+
+        vm
     }
 
     pub fn update_sr(&mut self, pre: Word, post: Word) {
@@ -368,11 +454,7 @@ impl CPU {
         self.execute(instr);
     }
 
-    pub fn run_debug(&mut self, mut offset: Word) {
-        if !self.stack_set {
-            panic!("[VM] Stack not set");
-        }
-
+    fn run_debug(&mut self, mut offset: Word) {
         // adjust that each char is printed with a space between
         // to make it look better in the console
         offset *= 2;
@@ -419,13 +501,39 @@ impl CPU {
         }
     }
 
-    pub fn run(&mut self) {
-        if !self.stack_set {
-            panic!("[VM] Stack not set");
-        }
-
+    fn run_normal(&mut self) {
         while !self.halt_signal {
             self.step();
+        }
+    }
+
+    pub fn run(&mut self) {
+        if self._debug_mode {
+            self.run_debug(self._debug_print_offset);
+        } else {
+            self.run_normal();
+        }
+
+        if self.cfg.enable_hd {
+            match fs::remove_file(self.cfg.hd_file.clone()) {
+                Ok(_) => {}
+                Err(_) => {},
+            }
+
+            let mut f = File::create(self.cfg.hd_file.clone()).expect(
+                format!(
+                    "[VM] Error creating hard drive file: {}",
+                    self.cfg.hd_file.clone()
+                )
+                .as_str(),
+            );
+
+            f.write_all(
+                self.memory_mapper
+                    .get_buffer(self.device_offsets.hard_drive)
+                    .as_slice(),
+            )
+            .expect("[VM] Error writing hard drive file");
         }
     }
 }

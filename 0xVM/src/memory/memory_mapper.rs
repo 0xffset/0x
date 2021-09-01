@@ -57,6 +57,12 @@ impl MemoryMapper {
             .get_range(final_addr, size)
     }
 
+    pub fn get_buffer(&self, addr: Word) -> Vec<Byte> {
+        let (region, _) = self.get_region_and_addr(addr);
+
+        self.regions[region].device.get_buffer()
+    }
+
     pub fn set_word(&mut self, addr: Word, value: Word) {
         let (region_index, final_addr) = self.get_region_and_addr(addr);
 

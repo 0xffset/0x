@@ -1,6 +1,6 @@
 use macros::reg;
 
-use crate::cpu::CPU;
+use crate::cpu::VM;
 
 macro_rules! instr {
     ($cpu:ident, w, $op:tt) => {
@@ -55,7 +55,7 @@ macro_rules! instr {
 /// If the flag Z is set, jump to 0xAF
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRBS(cpu: &mut CPU) {
+pub fn BRBS(cpu: &mut VM) {
     let flag = cpu.fetch_byte();
     let addr = cpu.fetch_word();
     if cpu.get_status_flag(flag) {
@@ -67,7 +67,7 @@ pub fn BRBS(cpu: &mut CPU) {
 /// If the flag Z is clear, jump to 0xAF
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRBC(cpu: &mut CPU) {
+pub fn BRBC(cpu: &mut VM) {
     let flag = cpu.fetch_byte();
     let addr = cpu.fetch_word();
     if !cpu.get_status_flag(flag) {
@@ -79,7 +79,7 @@ pub fn BRBC(cpu: &mut CPU) {
 /// Jump to 0x5 if acc does equal 0x1234
 #[inline]
 #[allow(non_snake_case)]
-pub fn BREQ(cpu: &mut CPU) {
+pub fn BREQ(cpu: &mut VM) {
     instr!(cpu, w, ==);
 }
 
@@ -87,7 +87,7 @@ pub fn BREQ(cpu: &mut CPU) {
 /// Jump to 0x5 if acc does equal register r1
 #[inline]
 #[allow(non_snake_case)]
-pub fn BREQR(cpu: &mut CPU) {
+pub fn BREQR(cpu: &mut VM) {
     instr!(cpu, r, ==);
 }
 
@@ -95,7 +95,7 @@ pub fn BREQR(cpu: &mut CPU) {
 /// Jump to 0x5 if register r1 does equal 0x1234
 #[inline]
 #[allow(non_snake_case)]
-pub fn BREQRW(cpu: &mut CPU) {
+pub fn BREQRW(cpu: &mut VM) {
     instr!(cpu, rw, ==);
 }
 
@@ -103,7 +103,7 @@ pub fn BREQRW(cpu: &mut CPU) {
 /// Jump to 0x5 if register r1 does equal register r2
 #[inline]
 #[allow(non_snake_case)]
-pub fn BREQRR(cpu: &mut CPU) {
+pub fn BREQRR(cpu: &mut VM) {
     instr!(cpu, rr, ==);
 }
 
@@ -111,7 +111,7 @@ pub fn BREQRR(cpu: &mut CPU) {
 /// Jump to 0x5 if acc does not equal 0x1234
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRNQ(cpu: &mut CPU) {
+pub fn BRNQ(cpu: &mut VM) {
     instr!(cpu, w, !=);
 }
 
@@ -119,7 +119,7 @@ pub fn BRNQ(cpu: &mut CPU) {
 /// Jump to 0x5 if acc does not equal register r1
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRNQR(cpu: &mut CPU) {
+pub fn BRNQR(cpu: &mut VM) {
     instr!(cpu, r, !=);
 }
 
@@ -127,7 +127,7 @@ pub fn BRNQR(cpu: &mut CPU) {
 /// Jump to 0x5 if register r1 does not equal 0x1234
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRNQRW(cpu: &mut CPU) {
+pub fn BRNQRW(cpu: &mut VM) {
     instr!(cpu, rw, !=);
 }
 
@@ -135,7 +135,7 @@ pub fn BRNQRW(cpu: &mut CPU) {
 /// Jump to 0x5 if register r1 does not equal register r2
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRNQRR(cpu: &mut CPU) {
+pub fn BRNQRR(cpu: &mut VM) {
     instr!(cpu, rr, !=);
 }
 
@@ -143,7 +143,7 @@ pub fn BRNQRR(cpu: &mut CPU) {
 /// Jump to 0x5 if acc is less than 0x1234
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRLT(cpu: &mut CPU) {
+pub fn BRLT(cpu: &mut VM) {
     instr!(cpu, w, <);
 }
 
@@ -151,7 +151,7 @@ pub fn BRLT(cpu: &mut CPU) {
 /// Jump to 0x5 if acc is less than register r1
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRLTR(cpu: &mut CPU) {
+pub fn BRLTR(cpu: &mut VM) {
     instr!(cpu, r, <);
 }
 
@@ -159,7 +159,7 @@ pub fn BRLTR(cpu: &mut CPU) {
 /// Jump to 0x5 if register r1 is less than 0x1234
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRLTRW(cpu: &mut CPU) {
+pub fn BRLTRW(cpu: &mut VM) {
     instr!(cpu, rw, <);
 }
 
@@ -167,7 +167,7 @@ pub fn BRLTRW(cpu: &mut CPU) {
 /// Jump to 0x5 if register r1 is less than register r2
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRLTRR(cpu: &mut CPU) {
+pub fn BRLTRR(cpu: &mut VM) {
     instr!(cpu, rr, <);
 }
 
@@ -175,7 +175,7 @@ pub fn BRLTRR(cpu: &mut CPU) {
 /// Jump to 0x5 if acc is greater than 0x1234
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRGT(cpu: &mut CPU) {
+pub fn BRGT(cpu: &mut VM) {
     instr!(cpu, w, >);
 }
 
@@ -183,7 +183,7 @@ pub fn BRGT(cpu: &mut CPU) {
 /// Jump to 0x5 if acc is greater than register r1
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRGTR(cpu: &mut CPU) {
+pub fn BRGTR(cpu: &mut VM) {
     instr!(cpu, r, >);
 }
 
@@ -191,7 +191,7 @@ pub fn BRGTR(cpu: &mut CPU) {
 /// Jump to 0x5 if register r1 is greater than 0x1234
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRGTRW(cpu: &mut CPU) {
+pub fn BRGTRW(cpu: &mut VM) {
     instr!(cpu, rw, >);
 }
 
@@ -199,7 +199,7 @@ pub fn BRGTRW(cpu: &mut CPU) {
 /// Jump to 0x5 if register r1 is greater than register r2
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRGTRR(cpu: &mut CPU) {
+pub fn BRGTRR(cpu: &mut VM) {
     instr!(cpu, rr, >);
 }
 
@@ -207,7 +207,7 @@ pub fn BRGTRR(cpu: &mut CPU) {
 /// Jump to 0x5 if acc is less than or equal 0x1234
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRLTE(cpu: &mut CPU) {
+pub fn BRLTE(cpu: &mut VM) {
     instr!(cpu, w, <=);
 }
 
@@ -215,7 +215,7 @@ pub fn BRLTE(cpu: &mut CPU) {
 /// Jump to 0x5 if acc is less than or equal register r1
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRLTER(cpu: &mut CPU) {
+pub fn BRLTER(cpu: &mut VM) {
     instr!(cpu, r, <=);
 }
 
@@ -223,7 +223,7 @@ pub fn BRLTER(cpu: &mut CPU) {
 /// Jump to 0x5 if register r1 is less than or equal 0x1234
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRLTERW(cpu: &mut CPU) {
+pub fn BRLTERW(cpu: &mut VM) {
     instr!(cpu, rw, <=);
 }
 
@@ -231,7 +231,7 @@ pub fn BRLTERW(cpu: &mut CPU) {
 /// Jump to 0x5 if register r1 is less than register or equal r2
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRLTERR(cpu: &mut CPU) {
+pub fn BRLTERR(cpu: &mut VM) {
     instr!(cpu, rr, <=);
 }
 
@@ -239,7 +239,7 @@ pub fn BRLTERR(cpu: &mut CPU) {
 /// Jump to 0x5 if acc is greater than or equal 0x1234
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRGTE(cpu: &mut CPU) {
+pub fn BRGTE(cpu: &mut VM) {
     instr!(cpu, w, >=);
 }
 
@@ -247,7 +247,7 @@ pub fn BRGTE(cpu: &mut CPU) {
 /// Jump to 0x5 if acc is greater than register or equal r1
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRGTER(cpu: &mut CPU) {
+pub fn BRGTER(cpu: &mut VM) {
     instr!(cpu, r, >=);
 }
 
@@ -255,7 +255,7 @@ pub fn BRGTER(cpu: &mut CPU) {
 /// Jump to 0x5 if register r1 is greater than or equal 0x1234
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRGTERW(cpu: &mut CPU) {
+pub fn BRGTERW(cpu: &mut VM) {
     instr!(cpu, rw, >=);
 }
 
@@ -263,6 +263,6 @@ pub fn BRGTERW(cpu: &mut CPU) {
 /// Jump to 0x5 if register r1 is greater than or equal register r2
 #[inline]
 #[allow(non_snake_case)]
-pub fn BRGTERR(cpu: &mut CPU) {
+pub fn BRGTERR(cpu: &mut VM) {
     instr!(cpu, rr, >=);
 }

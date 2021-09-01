@@ -1,6 +1,9 @@
 use std::io::{self, Write};
 
-use crate::memory::{Byte, HalfWord, Word};
+use crate::{
+    cpu::ScreenConfig,
+    memory::{Byte, HalfWord, Word},
+};
 
 use super::Device;
 
@@ -11,8 +14,11 @@ pub struct Screen {
 
 #[allow(dead_code)]
 impl Screen {
-    pub fn new(width: HalfWord, height: HalfWord) -> Self {
-        Screen { width, height }
+    pub fn new(cfg: ScreenConfig) -> Self {
+        Screen {
+            width: cfg.width,
+            height: cfg.height,
+        }
     }
 
     fn write(&self, data: &[u8]) {

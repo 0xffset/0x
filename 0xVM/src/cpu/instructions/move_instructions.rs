@@ -1,10 +1,10 @@
-use crate::cpu::CPU;
+use crate::cpu::VM;
 
 /// ## MOVR 0x1234, r1
 /// Move 0x1234 into register r1
 #[inline]
 #[allow(non_snake_case)]
-pub fn MOVR(cpu: &mut CPU) {
+pub fn MOVR(cpu: &mut VM) {
     let val = cpu.fetch_word();
     let r_addr = cpu.fetch_word();
     cpu.set_reg(r_addr, val);
@@ -14,7 +14,7 @@ pub fn MOVR(cpu: &mut CPU) {
 /// Move 0x1234 into memory at 0xAF
 #[inline]
 #[allow(non_snake_case)]
-pub fn MOVM(cpu: &mut CPU) {
+pub fn MOVM(cpu: &mut VM) {
     let val = cpu.fetch_word();
     let m_addr = cpu.fetch_word();
     cpu.memory_mapper.set_word(m_addr, val);
@@ -24,7 +24,7 @@ pub fn MOVM(cpu: &mut CPU) {
 /// Move register r1 into register r2
 #[inline]
 #[allow(non_snake_case)]
-pub fn MOVRR(cpu: &mut CPU) {
+pub fn MOVRR(cpu: &mut VM) {
     let r1_addr = cpu.fetch_word();
     let r2_addr = cpu.fetch_word();
     cpu.set_reg(r2_addr, cpu.get_reg(r1_addr));
@@ -34,7 +34,7 @@ pub fn MOVRR(cpu: &mut CPU) {
 /// Move register r1 into memory ar 0xAF
 #[inline]
 #[allow(non_snake_case)]
-pub fn MOVRM(cpu: &mut CPU) {
+pub fn MOVRM(cpu: &mut VM) {
     let r_addr = cpu.fetch_word();
     let m_addr = cpu.fetch_word();
     cpu.memory_mapper.set_word(m_addr, cpu.get_reg(r_addr));
@@ -44,7 +44,7 @@ pub fn MOVRM(cpu: &mut CPU) {
 /// Move memory at 0xAF into register r1
 #[inline]
 #[allow(non_snake_case)]
-pub fn MOVMR(cpu: &mut CPU) {
+pub fn MOVMR(cpu: &mut VM) {
     let m_addr = cpu.fetch_word();
     let r_addr = cpu.fetch_word();
     cpu.set_reg(r_addr, cpu.memory_mapper.get_word(m_addr));
@@ -54,7 +54,7 @@ pub fn MOVMR(cpu: &mut CPU) {
 /// Move data pointed at by register r1 into register r2
 #[inline]
 #[allow(non_snake_case)]
-pub fn MOVRPR(cpu: &mut CPU) {
+pub fn MOVRPR(cpu: &mut VM) {
     let r1_addr = cpu.fetch_word();
     let r2_addr = cpu.fetch_word();
     let data_addr = cpu.get_reg(r1_addr);
@@ -66,7 +66,7 @@ pub fn MOVRPR(cpu: &mut CPU) {
 /// Move data pointed at by register r1 plus an offset 0x2 into register r2
 #[inline]
 #[allow(non_snake_case)]
-pub fn MOVROR(cpu: &mut CPU) {
+pub fn MOVROR(cpu: &mut VM) {
     let r1_addr = cpu.fetch_word();
     let offset = cpu.fetch_word();
     let r2_addr = cpu.fetch_word();
@@ -106,7 +106,7 @@ macro_rules! instr {
 /// Load R2 bytes from device at R1* to memory at 0x1238-0x1238 + R2
 #[inline]
 #[allow(non_snake_case)]
-pub fn LOAD(cpu: &mut CPU) {
+pub fn LOAD(cpu: &mut VM) {
     let (addr, size) = instr!(l, cpu);
     let dest = cpu.fetch_word();
 
@@ -127,7 +127,7 @@ pub fn LOAD(cpu: &mut CPU) {
 /// Load R2 bytes from device at R1* to memory at R3*-R3* + R2
 #[inline]
 #[allow(non_snake_case)]
-pub fn LOADR(cpu: &mut CPU) {
+pub fn LOADR(cpu: &mut VM) {
     let (addr, size) = instr!(l, cpu);
     let dest_ptr = cpu.fetch_word();
     let dest = cpu.get_reg(dest_ptr);
@@ -150,7 +150,7 @@ pub fn LOADR(cpu: &mut CPU) {
 /// Load R2 bytes from device at R1* to memory at 0x1238*-0x1238* + R2
 #[inline]
 #[allow(non_snake_case)]
-pub fn LOADM(cpu: &mut CPU) {
+pub fn LOADM(cpu: &mut VM) {
     let (addr, size) = instr!(l, cpu);
     let dest_ptr = cpu.fetch_word();
     let dest = cpu.memory_mapper.get_word(dest_ptr);
@@ -173,7 +173,7 @@ pub fn LOADM(cpu: &mut CPU) {
 /// Store R2 bytes from memory at 0x1238-0x1238 + R2 to device at R1*
 #[inline]
 #[allow(non_snake_case)]
-pub fn STORE(cpu: &mut CPU) {
+pub fn STORE(cpu: &mut VM) {
     let src = cpu.fetch_word();
     let (size, dest) = instr!(s, cpu);
 
@@ -194,7 +194,7 @@ pub fn STORE(cpu: &mut CPU) {
 /// Store R2 bytes from memory at R3*-R3* + R2 to device at R1*
 #[inline]
 #[allow(non_snake_case)]
-pub fn STORER(cpu: &mut CPU) {
+pub fn STORER(cpu: &mut VM) {
     let src_ptr = cpu.fetch_word();
     let src = cpu.get_reg(src_ptr);
     let (size, dest) = instr!(s, cpu);
@@ -217,7 +217,7 @@ pub fn STORER(cpu: &mut CPU) {
 /// Store R2 bytes from memory at 0x1238*-0x1238* + R2 to device at R1*
 #[inline]
 #[allow(non_snake_case)]
-pub fn STOREM(cpu: &mut CPU) {
+pub fn STOREM(cpu: &mut VM) {
     let src_ptr = cpu.fetch_word();
     let src = cpu.memory_mapper.get_word(src_ptr);
     let (size, dest) = instr!(s, cpu);
