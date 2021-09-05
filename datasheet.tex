@@ -66,8 +66,7 @@
 	\item \textbf{k} (32-Bit): Constant memory address \vspace{1ex}
 	\item \textbf{K} (32-Bit): Constant
 \end{itemize}
-\subsection{Opcodes}
-{
+\subsection{Opcodes}{
 	\renewcommand{\arraystretch}{1.5}
 	\begin{tabularx}{\textwidth}{|Y|Y|Y|Y|}
 		\hline
@@ -79,8 +78,8 @@
 }
 \newpage
 
-\section{Status register}
- {
+% idk why the fomratter makes this look so ugly but cba to find out
+\section{Status register}{
   \renewcommand{\arraystretch}{1.5}
   \begin{tabularx}{\textwidth}{|Y|Y|Y|Y|Y|Y|Y|Y|}
 	  \hline
@@ -150,20 +149,18 @@
 
 % generates the status register table
 \newcommand{\srtable}[4]{
-	{
-			\renewcommand{\arraystretch}{1.5}
-			\begin{tabularx}{\textwidth}{|Y|Y|Y|Y|Y|Y|Y|Y|}
-				\hline
-				 &  &  &  &  &  & \conditionwrapper{#3} & \conditionwrapper{#1} \\
-				\hline
-			\end{tabularx}
-			\ifthenelse{\isempty{#1}}
-			{}
-			{\srtabledescriptor{Z}{#2}}
-			\ifthenelse{\isempty{#3}}
-			{}
-			{\srtabledescriptor{O}{#4}}
-		}
+	\renewcommand{\arraystretch}{1.5}
+	\begin{tabularx}{\textwidth}{|Y|Y|Y|Y|Y|Y|Y|Y|}
+		\hline
+		 &  &  &  &  &  & \conditionwrapper{#3} & \conditionwrapper{#1} \\
+		\hline
+	\end{tabularx}
+	\ifthenelse{\isempty{#1}}
+	{}
+	{\srtabledescriptor{Z}{#2}}
+	\ifthenelse{\isempty{#3}}
+	{}
+	{\srtabledescriptor{O}{#4}}
 }
 
 % shurthand for textsubscript
