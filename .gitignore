@@ -4,3 +4,6 @@
 ~*.*
 **/*.img
 **/*.cfg
+datasheet.*
+!datasheet.tex
+!datasheet.pdf

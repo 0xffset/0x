@@ -18,4 +18,4 @@ As of now all devices must be added in the main function (might implement a conf
  - `program` must be a valid path or filename to a binary file produced by the assembler
 
 
-#### <br>Read the datasheet.docx for more information on registers and instructions.
+#### <br>Read the datasheet.pdf for more information on registers and instructions.

@@ -1,0 +1,336 @@
+% titlepage so the title page is more centered
+\documentclass[titlepage]{scrartcl}
+
+% use helvetica font
+\usepackage[scaled=1.05]{helvet}
+\usepackage[T1]{fontenc}
+\renewcommand\familydefault{\sfdefault}
+
+% for nice tables
+\usepackage{tabularx}
+\newcolumntype{Y}{>{\centering\arraybackslash}X} % centers text horizontally
+
+% provides \isempty test
+\usepackage{xifthen}
+
+% title page information
+\begin{titlepage} 
+\title{0x}
+\subtitle{A 32-Bit VM written in Rust powered by a custom instruction set}
+\author{0xffset}
+\date{}
+\end{titlepage}
+
+% === document start ===
+\begin{document}
+\maketitle
+\newpage
+\tableofcontents
+\newpage
+
+\section{Specs}
+\begin{itemize}
+	\item 32-bit architecture
+	\item 8 32-bit general purpose registers
+	\item Variable sized memory
+	\item Variable sized display
+	\item Variable sized hard drive
+\end{itemize}
+\newpage
+
+\section{Glossary}
+\subsection{Specialized registers}
+\begin{itemize}
+	\item \textbf{PC} (32-Bit): Program Counter
+	\item \textbf{SP} (32-Bit): Stack pointer
+	\item \textbf{FP} (32-Bit): Frame pointer
+	\item \textbf{ACC} (32-Bit): Accumulator
+	\item \textbf{SR} (32-Bit): Status register
+\end{itemize}
+\subsection{Operands}
+\begin{itemize}
+	\item \textbf{S}: Stack
+	\item \textbf{R} (32-Bit): Register
+	\item \textbf{Ro} (32-Bit): Origin register
+	\item \textbf{Rd} (32-Bit): Destination register
+	\item \textbf{R0} (32-Bit): Lowest general purpose register
+	\item \textbf{Rx} (32-Bit): Highest general purpose register \vspace{1ex}
+	\item \textbf{Rs} (32-Bit): Status register
+	\item \textbf{Sm}: Bitmaskt for status register
+	\item \textbf{Sx}: Highest bit of status register \vspace{1ex}
+	\item \textbf{M} (32-Bit): Memory address
+	\item \textbf{M0} (32-Bit): Lowest memory address
+	\item \textbf{Mx} (32-Bit): Highest memory address
+	\item \textbf{Mo} (32-Bit): Origin memory address
+	\item \textbf{Md} (32-Bit): Destination memory address
+	\item \textbf{k} (32-Bit): Constant memory address \vspace{1ex}
+	\item \textbf{K} (32-Bit): Constant
+\end{itemize}
+\subsection{Opcodes}
+{
+	\renewcommand{\arraystretch}{1.5}
+	\begin{tabularx}{\textwidth}{|Y|Y|Y|Y|}
+		\hline
+		\itshape{Instruction} & \itshape{Parameter 1} & \itshape{Parameter 2} & \itshape{Parameter n} \\
+		\hline
+		xxxx xxxx             & aaaa aaaa             & bbbb bbbb             & nnnn nnnn             \\
+		\hline
+	\end{tabularx}
+}
+\newpage
+
+\section{Status register}
+ {
+  \renewcommand{\arraystretch}{1.5}
+  \begin{tabularx}{\textwidth}{|Y|Y|Y|Y|Y|Y|Y|Y|}
+	  \hline
+	   &  &  &  &  &  & \textbf{O} & \textbf{Z} \\
+	  \hline
+  \end{tabularx}
+ }
+
+% generates a flag description
+\newcommand{\flagdesc}[3]{
+	\hfill \break
+	\textbf{#2 - #1 flag:}
+	\begin{itemize}
+		\item #3
+	\end{itemize}
+}
+
+\flagdesc{Zero}{Z}{If the result of an operation is zero, the zero flag is set.}
+\flagdesc{Overflow}{O}{If the result of an operation is too large to fit in 32-Bit, the overflow flag is set.}
+\newpage
+
+\section{Instructions}
+
+% generates a instruction description page
+\newcommand{\instruction}[9]{
+	\subsection{#1 - #2}
+	{
+		\renewcommand{\arraystretch}{1.5}
+		\begin{tabularx}{\textwidth}{XXX}
+			\textbf{Description:}     &                   &                          \\
+			\multicolumn{3}{>{\hsize=\dimexpr3\hsize+3\tabcolsep}X}{#3}              \\ [1ex]
+			\textbf{Operation:}       &                   &                          \\
+			\multicolumn{3}{>{\hsize=\dimexpr3\hsize+3\tabcolsep}X}{#4}              \\ [1ex]
+			\textbf{Syntax}           & \textbf{Operands} & \textbf{Program counter} \\
+			#5                        & #6                & #7                       \\ [1ex]
+			\textbf{Opcode:}          &                   &                          \\
+			\multicolumn{3}{>{\hsize=\dimexpr3\hsize+3\tabcolsep}X}{#8}              \\ [1ex]
+			\textbf{Status register:} &                   &                          \\
+			% ugly because of tabularx but it works https://tex.stackexchange.com/questions/236155/tabularx-and-multicolumn
+			\multicolumn{3}{>{\hsize=\dimexpr3\hsize+3\tabcolsep}X}{#9}              \\ [1ex]
+		\end{tabularx}
+	}
+	\newpage
+}
+
+% generates obcode table
+\newcommand{\opcodegen}[4]{
+	\renewcommand{\arraystretch}{1.5}
+	\begin{tabularx}{\textwidth}{|Y|Y|Y|Y|}
+		\hline
+		#1 & #2 & #3 & #4 \\
+		\hline
+	\end{tabularx}
+}
+
+% returns a dash if the argument is empty else the argument
+\newcommand{\conditionwrapper}[1]{
+	\ifthenelse{\isempty{#1}}
+	{-}
+	{#1}
+}
+
+\newcommand{\srtabledescriptor}[2]{
+	\hfill \break
+	\textbf{#1} - #2
+}
+
+% generates the status register table
+\newcommand{\srtable}[4]{
+	{
+			\renewcommand{\arraystretch}{1.5}
+			\begin{tabularx}{\textwidth}{|Y|Y|Y|Y|Y|Y|Y|Y|}
+				\hline
+				 &  &  &  &  &  & \conditionwrapper{#3} & \conditionwrapper{#1} \\
+				\hline
+			\end{tabularx}
+			\ifthenelse{\isempty{#1}}
+			{}
+			{\srtabledescriptor{Z}{#2}}
+			\ifthenelse{\isempty{#3}}
+			{}
+			{\srtabledescriptor{O}{#4}}
+		}
+}
+
+% shurthand for textsubscript
+\newcommand{\tss}[1]{\textsubscript{#1}}
+
+% actual instruction entries
+\instruction{HALT}{Halt}
+{Halts the program.}
+{None}
+{\texttt{HALT}}
+{None}
+{None}
+{\opcodegen{1111 1111}{}{}{}}
+{\srtable{}{}{}{}}
+
+\instruction{NOP}{No operation}
+{Does nothing.}
+{None}
+{\texttt{NOP}}
+{None}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0000 0000}{}{}{}}
+{\srtable{}{}{}{}}
+
+\instruction{MOVR}{Move to register}
+{Moves value \texttt{K} into register \texttt{Rd}.}
+{K $\rightarrow$ Rd}
+{\texttt{MOVR K, Rd}}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq Rd \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0001 0000}{KKKK KKKK}{dddd dddd}{}}
+{\srtable{}{}{}{}}
+
+\instruction{MOVM}{Move to memory}
+{Moves value \texttt{K} into memory location \texttt{k}.}
+{K $\rightarrow$ k}
+{\texttt{MOVM K, k}}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break M0 \leq k \leq Mx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0001 0001}{KKKK KKKK}{kkkk kkkk}{}}
+{\srtable{}{}{}{}}
+
+\instruction{MOVRR}{Move register to register}
+{Moves value from register \texttt{Ro} into register \texttt{Rd}.}
+{Ro $\rightarrow$ Rd}
+{\texttt{MOVRR Ro, Rd}}
+{$R0 \leq Ro, Rd \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0001 0010}{oooo oooo}{dddd dddd}{}}
+{\srtable{}{}{}{}}
+
+\instruction{MOVRM}{Move register to memory}
+{Moves value from a register \texttt{Ro} into memory location \texttt{k}.}
+{Ro $\rightarrow$ k}
+{\texttt{MOVRM Ro, k}}
+{$M0 \leq k \leq Mx \hfill \break R0 \leq Ro \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0001 0011}{oooo oooo}{kkkk kkkk}{}}
+{\srtable{}{}{}{}}
+
+\instruction{MOVMR}{Move memory to register}
+{Moves value from memory location \texttt{k} into register \texttt{Rd}.}
+{k $\rightarrow$ Rd}
+{\texttt{MOVMR k, Rd}}
+{$M0 \leq k \leq Mx \hfill \break R0 \leq Rd \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0001 0100}{kkkk kkkk}{dddd dddd}{}}
+{\srtable{}{}{}{}}
+
+\instruction{MOVRPR}{Move register pointer to register}
+{Moves a value from memory location \texttt{Ro*} into register \texttt{Rd}.}
+{Ro* $\rightarrow$ Rd}
+{\texttt{MOVRPR Ro, Rd}}
+{$R0 \leq Ro, Rd \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0001 0111}{oooo oooo}{dddd dddd}{}}
+{\srtable{}{}{}{}}
+
+\instruction{MOVROR}{Move register pointer + offset to register}
+{Moves a value from memory location \texttt{Ro* + K} into register \texttt{Rd}.}
+{Ro* + K $\rightarrow$ Rd}
+{\texttt{MOVROR Ro, K, Rd}}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq Ro, Rd \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0001 1000}{oooo oooo}{KKKK KKKK}{dddd dddd}}
+{\srtable{}{}{}{}}
+
+\instruction{LOAD}{Load buffer}
+{Copys a byte buffer from device at \texttt{Ro*} to memory range \texttt{k to k + R}.}
+{Ro* $\rightarrow$ k to k + R}
+{\texttt{LOAD Ro, R, k}}
+{$M0 \leq k \leq Mx \hfill \break R0 \leq Ro, R \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0001 1001}{oooo oooo}{RRRR RRRR}{kkkk kkkk}}
+{\srtable{}{}{}{}}
+
+\instruction{LOADR}{Load buffer}
+{Copys a byte buffer from device at \texttt{Ro*} to memory range \texttt{Rd* to Rd* + R}.}
+{Ro* $\rightarrow$ Rd* to Rd* + R}
+{\texttt{LOADR Ro, R, Rd}}
+{$R0 \leq Ro, R, Rd \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0001 1010}{oooo oooo}{RRRR RRRR}{dddd dddd}}
+{\srtable{}{}{}{}}
+
+\instruction{LOADM}{Load buffer}
+{Copys a byte buffer from device at \texttt{Ro*} to memory range \texttt{Md* to Md* + R}.}
+{Ro* $\rightarrow$ Md* to Md* + R}
+{\texttt{LOADM Ro, R, Md}}
+{$M0 \leq Md \leq Mx \hfill \break R0 \leq Ro, R \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0001 1011}{oooo oooo}{RRRR RRRR}{dddd dddd}}
+{\srtable{}{}{}{}}
+
+\instruction{STORE}{Store buffer}
+{Copys a byte buffer from memory range \texttt{k to k + R} to device at \texttt{Rd*}.}
+{k to k + R $\rightarrow$ Rd*}
+{\texttt{STORE k, R, Rd}}
+{$M0 \leq k \leq Mx \hfill \break R0 \leq Ro, R \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0001 1100}{kkkk kkkk}{RRRR RRRR}{dddd dddd}}
+{\srtable{}{}{}{}}
+
+\instruction{STORER}{Store buffer}
+{Copys a byte buffer from memory range \texttt{Ro* to Ro* + R} to device at \texttt{Rd*}.}
+{Ro* to Ro* + R $\rightarrow$ Rd*}
+{\texttt{STORER Ro, R, Rd}}
+{$R0 \leq Ro, R, Rd \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0001 1101}{oooo oooo}{RRRR RRRR}{dddd dddd}}
+{\srtable{}{}{}{}}
+
+\instruction{STOREM}{Store buffer}
+{Copys a byte buffer from memory range \texttt{Mo* to Mo* + R} to device at \texttt{Rd*}.}
+{Mo* to Mo* + R $\rightarrow$ Rd*}
+{\texttt{STOREM Mo, R, Rd}}
+{$M0 \leq k \leq Mx \hfill \break R0 \leq R, Rd \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0001 1110}{oooo oooo}{RRRR RRRR}{dddd dddd}}
+{\srtable{}{}{}{}}
+
+\instruction{POP}{Pop}
+{Pops a value from the stack into register \texttt{Rd}.}
+{S $\rightarrow$ Rd, SP - 4 $\rightarrow$ SP}
+{\texttt{POP Rd}}
+{$R0 \leq Rd \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0000 0101}{dddd dddd}{}{}}
+{\srtable{}{}{}{}}
+
+\instruction{PUSH}{Push}
+{Pushes value \texttt{K} onto the stack.}
+{SP + 4 $\rightarrow$ SP, K $\rightarrow$ S}
+{\texttt{PUSH K}}
+{$0 \leq K \leq 2^{32} - 1$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0001 0101}{KKKK KKKK}{}{}}
+{\srtable{}{}{}{}}
+
+\instruction{PUSHR}{Push register}
+{Pushes value \texttt{Ro} onto the stack.}
+{SP + 4 $\rightarrow$ SP, Ro $\rightarrow$ S}
+{\texttt{PUSH Ro}}
+{$R0 \leq Ro \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0001 0110}{oooo oooo}{}{}}
+{\srtable{}{}{}{}}
+
+% === end of file ===
+\end{document}
