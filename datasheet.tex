@@ -13,6 +13,9 @@
 % provides \isempty test
 \usepackage{xifthen}
 
+% make tables slightly bigger
+\renewcommand{\arraystretch}{1.5}
+
 % title page information
 \begin{titlepage} 
 \title{0x}
@@ -66,27 +69,23 @@
 	\item \textbf{k} (32-Bit): Constant memory address \vspace{1ex}
 	\item \textbf{K} (32-Bit): Constant
 \end{itemize}
-\subsection{Opcodes}{
-	\renewcommand{\arraystretch}{1.5}
-	\begin{tabularx}{\textwidth}{|Y|Y|Y|Y|}
-		\hline
-		\itshape{Instruction} & \itshape{Parameter 1} & \itshape{Parameter 2} & \itshape{Parameter n} \\
-		\hline
-		xxxx xxxx             & aaaa aaaa             & bbbb bbbb             & nnnn nnnn             \\
-		\hline
-	\end{tabularx}
-}
+\subsection{Opcodes}
+\begin{tabularx}{\textwidth}{|Y|Y|Y|Y|}
+	\hline
+	\itshape{Instruction} & \itshape{Parameter 1} & \itshape{Parameter 2} & \itshape{Parameter n} \\
+	\hline
+	xxxx xxxx             & aaaa aaaa             & bbbb bbbb             & nnnn nnnn             \\
+	\hline
+\end{tabularx}
 \newpage
 
-% idk why the fomratter makes this look so ugly but cba to find out
-\section{Status register}{
-  \renewcommand{\arraystretch}{1.5}
-  \begin{tabularx}{\textwidth}{|Y|Y|Y|Y|Y|Y|Y|Y|}
-	  \hline
-	   &  &  &  &  &  & \textbf{O} & \textbf{Z} \\
-	  \hline
-  \end{tabularx}
- }
+\section{Status register}
+\begin{tabularx}{\textwidth}{|Y|Y|Y|Y|Y|Y|Y|Y|}
+	\hline
+	 &  &  &  &  &  & \textbf{O} & \textbf{Z} \\
+	\hline
+\end{tabularx}
+
 
 % generates a flag description
 \newcommand{\flagdesc}[3]{
@@ -106,28 +105,24 @@
 % generates a instruction description page
 \newcommand{\instruction}[9]{
 	\subsection{#1 - #2}
-	{
-		\renewcommand{\arraystretch}{1.5}
-		\begin{tabularx}{\textwidth}{XXX}
-			\textbf{Description:}     &                   &                          \\
-			\multicolumn{3}{>{\hsize=\dimexpr3\hsize+3\tabcolsep}X}{#3}              \\ [1ex]
-			\textbf{Operation:}       &                   &                          \\
-			\multicolumn{3}{>{\hsize=\dimexpr3\hsize+3\tabcolsep}X}{#4}              \\ [1ex]
-			\textbf{Syntax}           & \textbf{Operands} & \textbf{Program counter} \\
-			\texttt{#5}               & #6                & #7                       \\ [1ex]
-			\textbf{Opcode:}          &                   &                          \\
-			\multicolumn{3}{>{\hsize=\dimexpr3\hsize+3\tabcolsep}X}{#8}              \\ [1ex]
-			\textbf{Status register:} &                   &                          \\
-			% ugly because of tabularx but it works https://tex.stackexchange.com/questions/236155/tabularx-and-multicolumn
-			\multicolumn{3}{>{\hsize=\dimexpr3\hsize+3\tabcolsep}X}{#9}              \\ [1ex]
-		\end{tabularx}
-	}
+	\begin{tabularx}{\textwidth}{XXX}
+		\textbf{Description:}     &                   &                          \\
+		\multicolumn{3}{>{\hsize=\dimexpr3\hsize+3\tabcolsep}X}{#3}              \\ [1ex]
+		\textbf{Operation:}       &                   &                          \\
+		\multicolumn{3}{>{\hsize=\dimexpr3\hsize+3\tabcolsep}X}{#4}              \\ [1ex]
+		\textbf{Syntax}           & \textbf{Operands} & \textbf{Program counter} \\
+		\texttt{#5}               & #6                & #7                       \\ [1ex]
+		\textbf{Opcode:}          &                   &                          \\
+		\multicolumn{3}{>{\hsize=\dimexpr3\hsize+3\tabcolsep}X}{#8}              \\ [1ex]
+		\textbf{Status register:} &                   &                          \\
+		% ugly because of tabularx but it works https://tex.stackexchange.com/questions/236155/tabularx-and-multicolumn
+		\multicolumn{3}{>{\hsize=\dimexpr3\hsize+3\tabcolsep}X}{#9}              \\ [1ex]
+	\end{tabularx}
 	\newpage
 }
 
 % generates obcode table
 \newcommand{\opcodegen}[4]{
-	\renewcommand{\arraystretch}{1.5}
 	\begin{tabularx}{\textwidth}{|Y|Y|Y|Y|}
 		\hline
 		#1 & #2 & #3 & #4 \\
@@ -149,7 +144,6 @@
 
 % generates the status register table
 \newcommand{\srtable}[4]{
-	\renewcommand{\arraystretch}{1.5}
 	\begin{tabularx}{\textwidth}{|Y|Y|Y|Y|Y|Y|Y|Y|}
 		\hline
 		 &  &  &  &  &  & \conditionwrapper{#3} & \conditionwrapper{#1} \\
