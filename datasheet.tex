@@ -115,7 +115,7 @@
 			\textbf{Operation:}       &                   &                          \\
 			\multicolumn{3}{>{\hsize=\dimexpr3\hsize+3\tabcolsep}X}{#4}              \\ [1ex]
 			\textbf{Syntax}           & \textbf{Operands} & \textbf{Program counter} \\
-			#5                        & #6                & #7                       \\ [1ex]
+			\texttt{#5}               & #6                & #7                       \\ [1ex]
 			\textbf{Opcode:}          &                   &                          \\
 			\multicolumn{3}{>{\hsize=\dimexpr3\hsize+3\tabcolsep}X}{#8}              \\ [1ex]
 			\textbf{Status register:} &                   &                          \\
@@ -173,7 +173,7 @@
 \instruction{HALT}{Halt}
 {Halts the program.}
 {None}
-{\texttt{HALT}}
+{HALT}
 {None}
 {None}
 {\opcodegen{1111 1111}{}{}{}}
@@ -182,7 +182,7 @@
 \instruction{NOP}{No operation}
 {Does nothing.}
 {None}
-{\texttt{NOP}}
+{NOP}
 {None}
 {PC + 1 $\rightarrow$ PC}
 {\opcodegen{0000 0000}{}{}{}}
@@ -191,7 +191,7 @@
 \instruction{MOVR}{Move to register}
 {Moves value \texttt{K} into register \texttt{Rd}.}
 {K $\rightarrow$ Rd}
-{\texttt{MOVR K, Rd}}
+{MOVR K, Rd}
 {$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq Rd \leq Rx$}
 {PC + 1 $\rightarrow$ PC}
 {\opcodegen{0001 0000}{KKKK KKKK}{dddd dddd}{}}
@@ -200,7 +200,7 @@
 \instruction{MOVM}{Move to memory}
 {Moves value \texttt{K} into memory location \texttt{k}.}
 {K $\rightarrow$ k}
-{\texttt{MOVM K, k}}
+{MOVM K, k}
 {$0 \leq K \leq 2^{32} - 1 \hfill \break M0 \leq k \leq Mx$}
 {PC + 1 $\rightarrow$ PC}
 {\opcodegen{0001 0001}{KKKK KKKK}{kkkk kkkk}{}}
@@ -209,7 +209,7 @@
 \instruction{MOVRR}{Move register to register}
 {Moves value from register \texttt{Ro} into register \texttt{Rd}.}
 {Ro $\rightarrow$ Rd}
-{\texttt{MOVRR Ro, Rd}}
+{MOVRR Ro, Rd}
 {$R0 \leq Ro, Rd \leq Rx$}
 {PC + 1 $\rightarrow$ PC}
 {\opcodegen{0001 0010}{oooo oooo}{dddd dddd}{}}
@@ -218,7 +218,7 @@
 \instruction{MOVRM}{Move register to memory}
 {Moves value from a register \texttt{Ro} into memory location \texttt{k}.}
 {Ro $\rightarrow$ k}
-{\texttt{MOVRM Ro, k}}
+{MOVRM Ro, k}
 {$M0 \leq k \leq Mx \hfill \break R0 \leq Ro \leq Rx$}
 {PC + 1 $\rightarrow$ PC}
 {\opcodegen{0001 0011}{oooo oooo}{kkkk kkkk}{}}
@@ -227,7 +227,7 @@
 \instruction{MOVMR}{Move memory to register}
 {Moves value from memory location \texttt{k} into register \texttt{Rd}.}
 {k $\rightarrow$ Rd}
-{\texttt{MOVMR k, Rd}}
+{MOVMR k, Rd}
 {$M0 \leq k \leq Mx \hfill \break R0 \leq Rd \leq Rx$}
 {PC + 1 $\rightarrow$ PC}
 {\opcodegen{0001 0100}{kkkk kkkk}{dddd dddd}{}}
@@ -236,7 +236,7 @@
 \instruction{MOVRPR}{Move register pointer to register}
 {Moves a value from memory location \texttt{Ro*} into register \texttt{Rd}.}
 {Ro* $\rightarrow$ Rd}
-{\texttt{MOVRPR Ro, Rd}}
+{MOVRPR Ro, Rd}
 {$R0 \leq Ro, Rd \leq Rx$}
 {PC + 1 $\rightarrow$ PC}
 {\opcodegen{0001 0111}{oooo oooo}{dddd dddd}{}}
@@ -245,7 +245,7 @@
 \instruction{MOVROR}{Move register pointer + offset to register}
 {Moves a value from memory location \texttt{Ro* + K} into register \texttt{Rd}.}
 {Ro* + K $\rightarrow$ Rd}
-{\texttt{MOVROR Ro, K, Rd}}
+{MOVROR Ro, K, Rd}
 {$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq Ro, Rd \leq Rx$}
 {PC + 1 $\rightarrow$ PC}
 {\opcodegen{0001 1000}{oooo oooo}{KKKK KKKK}{dddd dddd}}
@@ -254,7 +254,7 @@
 \instruction{LOAD}{Load buffer}
 {Copys a byte buffer from device at \texttt{Ro*} to memory range \texttt{k to k + R}.}
 {Ro* $\rightarrow$ k to k + R}
-{\texttt{LOAD Ro, R, k}}
+{LOAD Ro, R, k}
 {$M0 \leq k \leq Mx \hfill \break R0 \leq Ro, R \leq Rx$}
 {PC + 1 $\rightarrow$ PC}
 {\opcodegen{0001 1001}{oooo oooo}{RRRR RRRR}{kkkk kkkk}}
@@ -263,7 +263,7 @@
 \instruction{LOADR}{Load buffer}
 {Copys a byte buffer from device at \texttt{Ro*} to memory range \texttt{Rd* to Rd* + R}.}
 {Ro* $\rightarrow$ Rd* to Rd* + R}
-{\texttt{LOADR Ro, R, Rd}}
+{LOADR Ro, R, Rd}
 {$R0 \leq Ro, R, Rd \leq Rx$}
 {PC + 1 $\rightarrow$ PC}
 {\opcodegen{0001 1010}{oooo oooo}{RRRR RRRR}{dddd dddd}}
@@ -272,7 +272,7 @@
 \instruction{LOADM}{Load buffer}
 {Copys a byte buffer from device at \texttt{Ro*} to memory range \texttt{Md* to Md* + R}.}
 {Ro* $\rightarrow$ Md* to Md* + R}
-{\texttt{LOADM Ro, R, Md}}
+{LOADM Ro, R, Md}
 {$M0 \leq Md \leq Mx \hfill \break R0 \leq Ro, R \leq Rx$}
 {PC + 1 $\rightarrow$ PC}
 {\opcodegen{0001 1011}{oooo oooo}{RRRR RRRR}{dddd dddd}}
@@ -281,7 +281,7 @@
 \instruction{STORE}{Store buffer}
 {Copys a byte buffer from memory range \texttt{k to k + R} to device at \texttt{Rd*}.}
 {k to k + R $\rightarrow$ Rd*}
-{\texttt{STORE k, R, Rd}}
+{STORE k, R, Rd}
 {$M0 \leq k \leq Mx \hfill \break R0 \leq Ro, R \leq Rx$}
 {PC + 1 $\rightarrow$ PC}
 {\opcodegen{0001 1100}{kkkk kkkk}{RRRR RRRR}{dddd dddd}}
@@ -290,7 +290,7 @@
 \instruction{STORER}{Store buffer}
 {Copys a byte buffer from memory range \texttt{Ro* to Ro* + R} to device at \texttt{Rd*}.}
 {Ro* to Ro* + R $\rightarrow$ Rd*}
-{\texttt{STORER Ro, R, Rd}}
+{STORER Ro, R, Rd}
 {$R0 \leq Ro, R, Rd \leq Rx$}
 {PC + 1 $\rightarrow$ PC}
 {\opcodegen{0001 1101}{oooo oooo}{RRRR RRRR}{dddd dddd}}
@@ -299,7 +299,7 @@
 \instruction{STOREM}{Store buffer}
 {Copys a byte buffer from memory range \texttt{Mo* to Mo* + R} to device at \texttt{Rd*}.}
 {Mo* to Mo* + R $\rightarrow$ Rd*}
-{\texttt{STOREM Mo, R, Rd}}
+{STOREM Mo, R, Rd}
 {$M0 \leq k \leq Mx \hfill \break R0 \leq R, Rd \leq Rx$}
 {PC + 1 $\rightarrow$ PC}
 {\opcodegen{0001 1110}{oooo oooo}{RRRR RRRR}{dddd dddd}}
@@ -308,7 +308,7 @@
 \instruction{POP}{Pop}
 {Pops a value from the stack into register \texttt{Rd}.}
 {S $\rightarrow$ Rd, SP - 4 $\rightarrow$ SP}
-{\texttt{POP Rd}}
+{POP Rd}
 {$R0 \leq Rd \leq Rx$}
 {PC + 1 $\rightarrow$ PC}
 {\opcodegen{0000 0101}{dddd dddd}{}{}}
@@ -317,7 +317,7 @@
 \instruction{PUSH}{Push}
 {Pushes value \texttt{K} onto the stack.}
 {SP + 4 $\rightarrow$ SP, K $\rightarrow$ S}
-{\texttt{PUSH K}}
+{PUSH K}
 {$0 \leq K \leq 2^{32} - 1$}
 {PC + 1 $\rightarrow$ PC}
 {\opcodegen{0001 0101}{KKKK KKKK}{}{}}
@@ -326,7 +326,7 @@
 \instruction{PUSHR}{Push register}
 {Pushes value \texttt{Ro} onto the stack.}
 {SP + 4 $\rightarrow$ SP, Ro $\rightarrow$ S}
-{\texttt{PUSH Ro}}
+{PUSH Ro}
 {$R0 \leq Ro \leq Rx$}
 {PC + 1 $\rightarrow$ PC}
 {\opcodegen{0001 0110}{oooo oooo}{}{}}
