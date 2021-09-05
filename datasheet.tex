@@ -144,6 +144,9 @@
 
 % generates the status register table
 \newcommand{\srtable}[4]{
+	\begin{tabularx}{\textwidth}{YYYYYYYY}
+		 &  &  &  &  &  & \textbf{O} & \textbf{Z} \\
+	\end{tabularx}
 	\begin{tabularx}{\textwidth}{|Y|Y|Y|Y|Y|Y|Y|Y|}
 		\hline
 		 &  &  &  &  &  & \conditionwrapper{#3} & \conditionwrapper{#1} \\
@@ -151,10 +154,18 @@
 	\end{tabularx}
 	\ifthenelse{\isempty{#1}}
 	{}
-	{\srtabledescriptor{Z}{#2}}
+	{
+		\ifthenelse{\isempty{#2}}
+		{\srtabledescriptor{Z}{Set if the operation results in 0}}
+		{\srtabledescriptor{Z}{#2}}
+	}
 	\ifthenelse{\isempty{#3}}
 	{}
-	{\srtabledescriptor{O}{#4}}
+	{
+		\ifthenelse{\isempty{#4}}
+		{\srtabledescriptor{O}{Set if the operation overflows}}
+		{\srtabledescriptor{O}{#4}}
+	}
 }
 
 % shurthand for textsubscript
@@ -322,6 +333,96 @@
 {PC + 1 $\rightarrow$ PC}
 {\opcodegen{0001 0110}{oooo oooo}{}{}}
 {\srtable{}{}{}{}}
+
+\instruction{ADD}{Add}
+{Adds value \texttt{K} and register \texttt{R} together and stores the result in \texttt{ACC}.}
+{K + R $\rightarrow$ ACC}
+{ADD K, R}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq R \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0010 0000}{KKKK KKKK}{RRRR RRRR}{}}
+{\srtable{x}{}{x}{}}
+
+\instruction{ADDR}{Add register}
+{Adds register \texttt{R\tss{1}} and register \texttt{R\tss{2}} together and stores the result in \texttt{ACC}.}
+{R\tss{1} + R\tss{2} $\rightarrow$ ACC}
+{ADDR R\tss{1}, R\tss{2}}
+{$R0 \leq R_{1}, R_{2} \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0010 0001}{R\tss{1}R\tss{1} R\tss{1}R\tss{1}}{R\tss{2}R\tss{2} R\tss{2}R\tss{2}}{}}
+{\srtable{x}{}{x}{}}
+
+\instruction{SUB}{Subtract}
+{Subtracts value \texttt{K} from register \texttt{R} and stores the result in \texttt{ACC}.}
+{R - K $\rightarrow$ ACC}
+{SUB R, K}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq R \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0010 0010}{RRRR RRRR}{KKKK KKKK}{}}
+{\srtable{x}{}{x}{}}
+
+\instruction{SUBWR}{Subtract register from word}
+{Subtracts register \texttt{R} from value \texttt{K} and stores the result in \texttt{ACC}.}
+{K - R $\rightarrow$ ACC}
+{SUBWR K, R}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq R \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0010 0010}{KKKK KKKK}{RRRR RRRR}{}}
+{\srtable{x}{}{x}{}}
+
+\instruction{SUBR}{Subtract register}
+{Subtracts register \texttt{R\tss{2}} from register \texttt{R\tss{1}} and stores the result in \texttt{ACC}.}
+{R\tss{1} - R\tss{2} $\rightarrow$ ACC}
+{SUBR R\tss{1}, R\tss{2}}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq R_{1}, R_{2} \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0010 0011}{R\tss{1}R\tss{1} R\tss{1}R\tss{1}}{R\tss{2}R\tss{2} R\tss{2}R\tss{2}}{}}
+{\srtable{x}{}{x}{}}
+
+\instruction{MULT}{Multiply}
+{Multiplies value \texttt{K} and register \texttt{R} together and stores the result in \texttt{ACC}.}
+{K $\times$ R $\rightarrow$ ACC}
+{MULT K, R}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq R \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0010 0101}{KKKK KKKK}{RRRR RRRR}{}}
+{\srtable{x}{}{x}{}}
+
+\instruction{MULTR}{Multiply register}
+{Multiplies register \texttt{R\tss{1}} and register \texttt{R\tss{2}} together and stores the result in \texttt{ACC}.}
+{R\tss{1} $\times$ R\tss{2} $\rightarrow$ ACC}
+{MULTR R\tss{1}, R\tss{2}}
+{$R0 \leq R_{1}, R_{2} \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0010 0110}{R\tss{1}R\tss{1} R\tss{1}R\tss{1}}{R\tss{2}R\tss{2} R\tss{2}R\tss{2}}{}}
+{\srtable{x}{}{x}{}}
+
+\instruction{DIV}{Divide}
+{Devides register \texttt{R} by value \texttt{K} and stores the result in \texttt{ACC}.}
+{R $\div$ K $\rightarrow$ ACC}
+{DIV R, K}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq R \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0010 0111}{RRRR RRRR}{KKKK KKKK}{}}
+{\srtable{x}{}{x}{}}
+
+\instruction{DIVWR}{Divide word by register}
+{Devides value \texttt{K} by register \texttt{R} and stores the result in \texttt{ACC}.}
+{K $\div$  R $\rightarrow$ ACC}
+{DIVWR K, R}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq R \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0010 1000}{KKKK KKKK}{RRRR RRRR}{}}
+{\srtable{x}{}{x}{}}
+
+\instruction{DIVR}{Divide registers}
+{Divides register \texttt{R\tss{1}} by register \texttt{R\tss{2}} and stores the result in \texttt{ACC}.}
+{R\tss{1} $\div$ R\tss{2} $\rightarrow$ ACC}
+{DIVR R\tss{1}, R\tss{2}}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq R_{1}, R_{2} \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0010 1001}{R\tss{1}R\tss{1} R\tss{1}R\tss{1}}{R\tss{2}R\tss{2} R\tss{2}R\tss{2}}{}}
+{\srtable{x}{}{x}{}}
 
 % === end of file ===
 \end{document}
