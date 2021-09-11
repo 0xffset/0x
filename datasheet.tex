@@ -59,7 +59,8 @@
 	\item \textbf{R0} (32-Bit): Lowest general purpose register
 	\item \textbf{Rx} (32-Bit): Highest general purpose register \vspace{1ex}
 	\item \textbf{Rs} (32-Bit): Status register
-	\item \textbf{Sm}: Bitmaskt for status register
+	\item \textbf{Sb} (8-Bit): Bit in status register
+	\item \textbf{S0}: Lowest bit in status register
 	\item \textbf{Sx}: Highest bit of status register \vspace{1ex}
 	\item \textbf{M} (32-Bit): Memory address
 	\item \textbf{M0} (32-Bit): Lowest memory address
@@ -423,6 +424,429 @@
 {PC + 1 $\rightarrow$ PC}
 {\opcodegen{0010 1001}{R\tss{1}R\tss{1} R\tss{1}R\tss{1}}{R\tss{2}R\tss{2} R\tss{2}R\tss{2}}{}}
 {\srtable{x}{}{x}{}}
+
+\instruction{INC}{Increment}
+{Increments register \texttt{Rd} by one.}
+{Rd + 1 $\rightarrow$ Rd}
+{INC Rd}
+{$R0 \leq Rd \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0010 1010}{dddd dddd}{}{}}
+{\srtable{x}{}{x}{}}
+
+\instruction{DEC}{Decrement}
+{Decrements register \texttt{Rd} by one.}
+{Rd - 1 $\rightarrow$ Rd}
+{DEC Rd}
+{$R0 \leq Rd \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0010 1011}{dddd dddd}{}{}}
+{\srtable{x}{}{x}{}}
+
+\instruction{LSF}{Left shift}
+{Shifts register \texttt{Rd} left by \texttt{K} bits.}
+{Rd $\ll$ K $\rightarrow$ Rd}
+{LSF Rd, K}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq Rd \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0101 0000}{dddd dddd}{KKKK KKKK}{}}
+{\srtable{x}{}{}{}}
+
+\instruction{LSFR}{Left shift by register}
+{Shifts register \texttt{Rd} left by \texttt{R} bits.}
+{Rd $\ll$ R $\rightarrow$ Rd}
+{LSFR Rd, R}
+{$R0 \leq Rd, R \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0101 0001}{dddd dddd}{RRRR RRRR}{}}
+{\srtable{x}{}{}{}}
+
+\instruction{RSF}{Right shift}
+{Shifts register \texttt{Rd} right by \texttt{K} bits.}
+{Rd $\gg$ K $\rightarrow$ Rd}
+{RSF Rd, K}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq Rd \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0101 0010}{dddd dddd}{KKKK KKKK}{}}
+{\srtable{x}{}{}{}}
+
+\instruction{RSFR}{Right shift by register}
+{Shifts register \texttt{Rd} right by \texttt{R} bits.}
+{Rd $\gg$ R $\rightarrow$ Rd}
+{RSFR Rd, R}
+{$R0 \leq Rd, R \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0101 0011}{dddd dddd}{RRRR RRRR}{}}
+{\srtable{x}{}{}{}}
+
+\instruction{WLSF}{Wrapping left shift}
+{Shifts register \texttt{Rd} left by \texttt{K} bits and wraps the bits around.}
+{Rd $\ll$ K $\rightarrow$ Rd}
+{WLSF Rd, K}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq Rd \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0101 0100}{dddd dddd}{KKKK KKKK}{}}
+{\srtable{x}{}{}{}}
+
+\instruction{WLSFR}{Wrapping left shift by register}
+{Shifts register \texttt{Rd} left by \texttt{R} bits and wraps the bits around.}
+{Rd $\ll$ R $\rightarrow$ Rd}
+{WLSFR Rd, R}
+{$R0 \leq Rd, R \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0101 0101}{dddd dddd}{RRRR RRRR}{}}
+{\srtable{x}{}{}{}}
+
+\instruction{WRSF}{Wrapping right shift}
+{Shifts register \texttt{Rd} right by \texttt{K} bits and wraps the bits around.}
+{Rd $\gg$ K $\rightarrow$ Rd}
+{WRSF Rd, K}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq Rd \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0101 0110}{dddd dddd}{KKKK KKKK}{}}
+{\srtable{x}{}{}{}}
+
+\instruction{WRSFR}{wrapping right shift by register}
+{Shifts register \texttt{Rd} right by \texttt{R} bits and wraps the bits around.}
+{Rd $\gg$ R $\rightarrow$ Rd}
+{WRSFR Rd, R}
+{$R0 \leq Rd, R \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0101 0111}{dddd dddd}{RRRR RRRR}{}}
+{\srtable{x}{}{}{}}
+
+\instruction{AND}{Bitwise AND}
+{Performs a bitwise AND operation on register \texttt{Rd} with value \texttt{K} and stores the result in \texttt{Rd}.}
+{Rd \& K $\rightarrow$ Rd}
+{AND Rd, K}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq Rd \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0101 1000}{dddd dddd}{KKKK KKKK}{}}
+{\srtable{x}{}{}{}}
+
+\instruction{ANDR}{Bitwise AND by register}
+{Performs a bitwise AND operation on register \texttt{Rd} with register \texttt{R} and stores the result in \texttt{Rd}.}
+{Rd \& R $\rightarrow$ Rd}
+{ANDR Rd, R}
+{$R0 \leq Rd, R \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0101 1001}{dddd dddd}{KKKK KKKK}{}}
+{\srtable{x}{}{}{}}
+
+\instruction{OR}{Bitwise OR}
+{Performs a bitwise OR operation on register \texttt{Rd} with value \texttt{K} and stores the result in \texttt{Rd}.}
+{Rd | K $\rightarrow$ Rd}
+{OR Rd, K}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq Rd \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0101 1010}{dddd dddd}{KKKK KKKK}{}}
+{\srtable{x}{}{}{}}
+
+\instruction{ORR}{Bitwise OR by register}
+{Performs a bitwise OR operation on register \texttt{Rd} with register \texttt{R} and stores the result in \texttt{Rd}.}
+{Rd | R $\rightarrow$ Rd}
+{ORR Rd, R}
+{$R0 \leq Rd, R \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0101 1011}{dddd dddd}{KKKK KKKK}{}}
+{\srtable{x}{}{}{}}
+
+\instruction{XOR}{Bitwise XOR}
+{Performs a bitwise XOR operation on register \texttt{Rd} with value \texttt{K} and stores the result in \texttt{Rd}.}
+{Rd \string^ K $\rightarrow$ Rd}
+{XOR Rd, K}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq Rd \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0101 1100}{dddd dddd}{KKKK KKKK}{}}
+{\srtable{x}{}{}{}}
+
+\instruction{XORR}{Bitwise XOR by register}
+{Performs a bitwise XOR operation on register \texttt{Rd} with register \texttt{R} and stores the result in \texttt{Rd}.}
+{Rd \string^ R $\rightarrow$ Rd}
+{XORR Rd, R}
+{$R0 \leq Rd, R \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0101 1101}{dddd dddd}{KKKK KKKK}{}}
+{\srtable{x}{}{}{}}
+
+\instruction{NOT}{Not}
+{Flips the bits of register \texttt{Rd}.}
+{\string~Rd $\rightarrow$ Rd}
+{NOT Rd}
+{$R0 \leq Rd \leq Rx$}
+{PC + 1 $\rightarrow$ PC}
+{\opcodegen{0101 1110}{dddd dddd}{}{}}
+{\srtable{x}{}{}{}}
+
+\instruction{BRBS}{Branch if bit set}
+{If the \texttt{Sb} bit in the SR is set, branch to absolute address \texttt{k}.}
+{If SR(Sb) = 1 then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRBS Sb, k}
+{$M0 \leq k \leq Mx \hfill \break S0 \leq Sb \leq Sx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0011 0000}{bbbb bbbb}{kkkk kkkk}{}}
+{\srtable{}{}{}{}}
+
+\instruction{BRBC}{Branch if bit clear}
+{If the \texttt{Sb} bit in the SR is clear, branch to absolute address \texttt{k}.}
+{If SR(Sb) = 0 then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRBC Sb, k}
+{$M0 \leq k \leq Mx \hfill \break S0 \leq Sb \leq Sx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0011 0001}{bbbb bbbb}{kkkk kkkk}{}}
+{\srtable{}{}{}{}}
+
+\instruction{BREQ}{Branch if equal}
+{If \texttt{K} is equal to \texttt{ACC}, branch to absolute address \texttt{k}.}
+{If ACC = K then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BREQ K, k}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break M0 \leq k \leq Mx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0011 0010}{KKKK KKKK}{kkkk kkkk}{}}
+{\srtable{}{}{}{}}
+
+\instruction{BREQR}{Branch if equal register}
+{If \texttt{R} is equal to \texttt{ACC}, branch to absolute address \texttt{k}.}
+{If ACC = R then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BREQR R, k}
+{$M0 \leq k \leq Mx \hfill \break R0 \leq R \leq Rx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0011 0011}{RRRR RRRR}{kkkk kkkk}{}}
+{\srtable{}{}{}{}}
+
+\instruction{BREQRW}{Branch if equal register and word}
+{If \texttt{K} is equal to \texttt{R}, branch to absolute address \texttt{k}.}
+{If R = K then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BREQRW R, K, k}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break M0 \leq k \leq Mx \hfill \break R0 \leq R \leq Rx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0011 0100}{RRRR RRRR}{KKKK KKKK}{kkkk kkkk}}
+{\srtable{}{}{}{}}
+
+\instruction{BREQRR}{Branch if equal registers}
+{If \texttt{R\tss{1}} is equal to \texttt{R\tss{2}}, branch to absolute address \texttt{k}.}
+{If R\tss{1} = R\tss{2} then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BREQRR R\tss{1}, R\tss{2}, k}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq R_{1}, R_{2} \leq Rx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0011 0101}{R\tss{1}R\tss{1} R\tss{1}R\tss{1}}{R\tss{2}R\tss{2} R\tss{2}R\tss{2}}{kkkk kkkk}}
+{\srtable{}{}{}{}}
+
+\instruction{BRNQ}{Branch if not equal}
+{If \texttt{K} is not equal to \texttt{ACC}, branch to absolute address \texttt{k}.}
+{If ACC $\neq$ K then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRNQ K, k}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break M0 \leq k \leq Mx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0011 0110}{KKKK KKKK}{kkkk kkkk}{}}
+{\srtable{}{}{}{}}
+
+\instruction{BRNQR}{Branch if not equal register}
+{If \texttt{R} is not equal to \texttt{ACC}, branch to absolute address \texttt{k}.}
+{If ACC $\neq$ R then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRNQR R, k}
+{$M0 \leq k \leq Mx \hfill \break R0 \leq R \leq Rx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0011 0111}{RRRR RRRR}{kkkk kkkk}{}}
+{\srtable{}{}{}{}}
+
+\instruction{BRNQRW}{Branch if not equal register and word}
+{If \texttt{K} is not equal to \texttt{R}, branch to absolute address \texttt{k}.}
+{If R $\neq$ K then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRNQRW R, K, k}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break M0 \leq k \leq Mx \hfill \break R0 \leq R \leq Rx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0011 1000}{RRRR RRRR}{KKKK KKKK}{kkkk kkkk}}
+{\srtable{}{}{}{}}
+
+\instruction{BREQRR}{Branch if not equal registers}
+{If \texttt{R\tss{1}} is not equal to \texttt{R\tss{2}}, branch to absolute address \texttt{k}.}
+{If R\tss{1} $\neq$ R\tss{2} then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRNQRR R\tss{1}, R\tss{2}, k}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq R_{1}, R_{2} \leq Rx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0011 1001}{R\tss{1}R\tss{1} R\tss{1}R\tss{1}}{R\tss{2}R\tss{2} R\tss{2}R\tss{2}}{kkkk kkkk}}
+{\srtable{}{}{}{}}
+
+\instruction{BRLT}{Branch if less than}
+{If \texttt{ACC} is less than \texttt{K}, branch to absolute address \texttt{k}.}
+{If ACC < K then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRLT K, k}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break M0 \leq k \leq Mx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0011 1010}{KKKK KKKK}{kkkk kkkk}{}}
+{\srtable{}{}{}{}}
+
+\instruction{BRLTR}{Branch if less than register}
+{If \texttt{ACC} is less than \texttt{R}, branch to absolute address \texttt{k}.}
+{If ACC < R then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRLTR R, k}
+{$M0 \leq k \leq Mx \hfill \break R0 \leq R \leq Rx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0011 1011}{RRRR RRRR}{kkkk kkkk}{}}
+{\srtable{}{}{}{}}
+
+\instruction{BRLTRW}{Branch if less than register and word}
+{If \texttt{R} is less than \texttt{K}, branch to absolute address \texttt{k}.}
+{If R < K then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRLTRW R, K, k}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break M0 \leq k \leq Mx \hfill \break R0 \leq R \leq Rx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0011 1100}{RRRR RRRR}{KKKK KKKK}{kkkk kkkk}}
+{\srtable{}{}{}{}}
+
+\instruction{BRLTRR}{Branch if less than registers}
+{If \texttt{R\tss{1}} is less than \texttt{R\tss{2}}, branch to absolute address \texttt{k}.}
+{If R\tss{1} < R\tss{2} then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRLTRR R\tss{1}, R\tss{2}, k}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq R_{1}, R_{2} \leq Rx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0011 1101}{R\tss{1}R\tss{1} R\tss{1}R\tss{1}}{R\tss{2}R\tss{2} R\tss{2}R\tss{2}}{kkkk kkkk}}
+{\srtable{}{}{}{}}
+
+\instruction{BRGT}{Branch if greater than}
+{If \texttt{ACC} is greater than \texttt{K}, branch to absolute address \texttt{k}.}
+{If ACC > K then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRGT K, k}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break M0 \leq k \leq Mx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0011 1110}{KKKK KKKK}{kkkk kkkk}{}}
+{\srtable{}{}{}{}}
+
+\instruction{BRGTR}{Branch if greater than register}
+{If \texttt{ACC} is greater than \texttt{R}, branch to absolute address \texttt{k}.}
+{If ACC > R then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRGTR R, k}
+{$M0 \leq k \leq Mx \hfill \break R0 \leq R \leq Rx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0011 1111}{RRRR RRRR}{kkkk kkkk}{}}
+{\srtable{}{}{}{}}
+
+\instruction{BRGTRW}{Branch if greater than register and word}
+{If \texttt{R} is greater than \texttt{K}, branch to absolute address \texttt{k}.}
+{If R > K then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRGTRW R, K, k}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break M0 \leq k \leq Mx \hfill \break R0 \leq R \leq Rx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0100 0000}{RRRR RRRR}{KKKK KKKK}{kkkk kkkk}}
+{\srtable{}{}{}{}}
+
+\instruction{BRGTRR}{Branch if greater than registers}
+{If \texttt{R\tss{1}} is greater than \texttt{R\tss{2}}, branch to absolute address \texttt{k}.}
+{If R\tss{1} > R\tss{2} then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRGTRR R\tss{1}, R\tss{2}, k}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq R_{1}, R_{2} \leq Rx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0100 0001}{R\tss{1}R\tss{1} R\tss{1}R\tss{1}}{R\tss{2}R\tss{2} R\tss{2}R\tss{2}}{kkkk kkkk}}
+{\srtable{}{}{}{}}
+
+\instruction{BRLTE}{Branch if less than or equals}
+{If \texttt{ACC} is less than or equals \texttt{K}, branch to absolute address \texttt{k}.}
+{If ACC $\leq$ K then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRLTE K, k}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break M0 \leq k \leq Mx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0100 0010}{KKKK KKKK}{kkkk kkkk}{}}
+{\srtable{}{}{}{}}
+
+\instruction{BRLTER}{Branch if less than or equals register}
+{If \texttt{ACC} is less than or equals \texttt{R}, branch to absolute address \texttt{k}.}
+{If ACC $\leq$ R then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRLTER R, k}
+{$M0 \leq k \leq Mx \hfill \break R0 \leq R \leq Rx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0100 0011}{RRRR RRRR}{kkkk kkkk}{}}
+{\srtable{}{}{}{}}
+
+\instruction{BRLTERW}{Branch if less than or equals register and word}
+{If \texttt{R} is less than or equals \texttt{K}, branch to absolute address \texttt{k}.}
+{If R $\leq$ K then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRLTERW R, K, k}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break M0 \leq k \leq Mx \hfill \break R0 \leq R \leq Rx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0100 0100}{RRRR RRRR}{KKKK KKKK}{kkkk kkkk}}
+{\srtable{}{}{}{}}
+
+\instruction{BRLTERR}{Branch if less than or equals registers}
+{If \texttt{R\tss{1}} is less than or equals \texttt{R\tss{2}}, branch to absolute address \texttt{k}.}
+{If R\tss{1} $\leq$ R\tss{2} then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRLTERR R\tss{1}, R\tss{2}, k}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq R_{1}, R_{2} \leq Rx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0100 0101}{R\tss{1}R\tss{1} R\tss{1}R\tss{1}}{R\tss{2}R\tss{2} R\tss{2}R\tss{2}}{kkkk kkkk}}
+{\srtable{}{}{}{}}
+
+\instruction{BRGTE}{Branch if greater than or equals}
+{If \texttt{ACC} is greater than or equals \texttt{K}, branch to absolute address \texttt{k}.}
+{If ACC $\geq$ K then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRGTE K, k}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break M0 \leq k \leq Mx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0100 0110}{KKKK KKKK}{kkkk kkkk}{}}
+{\srtable{}{}{}{}}
+
+\instruction{BRGTER}{Branch if greater than or equals register}
+{If \texttt{ACC} is greater than or equals \texttt{R}, branch to absolute address \texttt{k}.}
+{If ACC $\geq$ R then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRGTER R, k}
+{$M0 \leq k \leq Mx \hfill \break R0 \leq R \leq Rx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0100 0111}{RRRR RRRR}{kkkk kkkk}{}}
+{\srtable{}{}{}{}}
+
+\instruction{BRGTERW}{Branch if greater than or equals register and word}
+{If \texttt{R} is greater than or equals \texttt{K}, branch to absolute address \texttt{k}.}
+{If R $\geq$ K then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRGTERW R, K, k}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break M0 \leq k \leq Mx \hfill \break R0 \leq R \leq Rx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0100 1000}{RRRR RRRR}{KKKK KKKK}{kkkk kkkk}}
+{\srtable{}{}{}{}}
+
+\instruction{BRGTERR}{Branch if greater than or equals registers}
+{If \texttt{R\tss{1}} is greater than or equals \texttt{R\tss{2}}, branch to absolute address \texttt{k}.}
+{If R\tss{1} $\geq$ R\tss{2} then k $\rightarrow$ PC else PC + 1 $\rightarrow$ PC}
+{BRGTERR R\tss{1}, R\tss{2}, k}
+{$0 \leq K \leq 2^{32} - 1 \hfill \break R0 \leq R_{1}, R_{2} \leq Rx$}
+{k $\rightarrow$ PC \hfill \break PC + 1 $\rightarrow$ PC}
+{\opcodegen{0100 1001}{R\tss{1}R\tss{1} R\tss{1}R\tss{1}}{R\tss{2}R\tss{2} R\tss{2}R\tss{2}}{kkkk kkkk}}
+{\srtable{}{}{}{}}
+
+\instruction{JMP}{Jump}
+{Jump to absolute address \texttt{k}.}
+{k $\rightarrow$ PC}
+{JMP k}
+{$M0 \leq k \leq Mx$}
+{k $\rightarrow$ PC}
+{\opcodegen{0000 0001}{kkkk kkkk}{}{}}
+{\srtable{}{}{}{}}
+
+\instruction{CALL}{Call subroutine}
+{Push \texttt{SF} onto the stack and jump to absolute address \texttt{k}.}
+{SF $\rightarrow$ PC, k $\rightarrow$ PC}
+{CALL k}
+{$M0 \leq k \leq Mx$}
+{k $\rightarrow$ PC}
+{\opcodegen{0000 0010}{kkkk kkkk}{}{}}
+{\srtable{}{}{}{}}
+
+\instruction{CALLR}{Call subroutine from register}
+{Push \texttt{SF} onto the stack and jump to absolute address \texttt{R}.}
+{SF $\rightarrow$ PC, R $\rightarrow$ PC}
+{CALLR R}
+{$R0 \leq R \leq Rx$}
+{k $\rightarrow$ PC}
+{\opcodegen{0000 0011}{RRRR RRRR}{}{}}
+{\srtable{}{}{}{}}
+
+\instruction{RET}{Return from subroutine}
+{Pop \texttt{SF} from stack and return from subroutine.}
+{SF $\rightarrow$ R0 - Rx, SF $\rightarrow$ PC}
+{RET}
+{None}
+{SF $\rightarrow$ PC}
+{\opcodegen{0000 0100}{}{}{}}
+{\srtable{}{}{}{}}
 
 % === end of file ===
 \end{document}
