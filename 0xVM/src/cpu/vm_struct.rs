@@ -52,7 +52,7 @@ pub struct VM {
 
 #[allow(dead_code)]
 impl VM {
-    pub fn new(cfg: Config) -> Self {
+    pub fn new(cfg: &Config) -> Self {
         let mut _debug_print_offset = 0;
 
         // create memory mapper
@@ -72,12 +72,10 @@ impl VM {
         if cfg.enable_screen {
             device_offsets.screen = pc_offset;
 
-            let screen = Screen::new(cfg.screen_cfg);
-
             _debug_print_offset = cfg.screen_cfg.width as Word;
 
             // map screen into memory
-            memory_mapper.map(Box::new(screen), 0, cfg.screen_cfg.size);
+            memory_mapper.map(Box::new(Screen::new(cfg.screen_cfg)), 0, cfg.screen_cfg.size);
             pc_offset = cfg.screen_cfg.size;
         }
 
@@ -384,7 +382,7 @@ impl VM {
             // move cursor and print register name
             output.push_str(
                 format!(
-                    "\x1b[{};{}H{:<4} ",
+                    "\x1b[{};{}H\x1b[0K{:<4} ",
                     i as Word + 1,
                     offset + 3,
                     format!("{}:", name)
@@ -422,7 +420,7 @@ impl VM {
             // and print memory address and value
             output.push_str(
                 format!(
-                    "\x1b[{};{}H0x{:08X}:",
+                    "\x1b[{};{}H\x1b[0K0x{:08X}:",
                     crate::REGISTER_COUNT as Word + 2 + i as Word,
                     offset + 3,
                     self._debug_memory_pos as usize + i * 4

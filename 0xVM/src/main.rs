@@ -40,5 +40,5 @@ fn main() {
         }
     }));
 
-    VM::new(generate_config(args.get(1).unwrap())).run();
+    VM::new(&generate_config(args.get(1).unwrap())).run();
 }
